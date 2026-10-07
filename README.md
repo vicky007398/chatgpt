@@ -91,3 +91,7 @@ Legal pages draw operator details from environment settings, list policy version
 ## Free launch — current mode
 
 KosRent is free until an explicit later code update. Renewal collection is disabled in the server regardless of an old BILLING_ENABLED value. Public listing/chat queries ignore stored expiry dates; approved Kosamba rentals remain visible until rented/removed/moderated. Owner screens and policies no longer advertise fees or expiry reminders. Old expiry dates and payment records are retained for record keeping, but do not authorise future charging. No timed switch to paid mode is scheduled. Reintroduce paid plans only with advance notice, updated terms and fresh consent. Keep BILLING_ENABLED=false in Railway as well.
+
+## Immediate publication
+
+Valid new Kosamba rental listings publish immediately, without administrator approval. Active listing edits stay public. Existing pending Kosamba house rentals are released when the updated server starts. Removed, rejected and rented listings are not restored by this migration or an ordinary owner edit. Reporting and administrator removal remain available. Listings are owner-provided and are not verified by KosRent.
