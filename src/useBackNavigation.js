@@ -1,0 +1,12 @@
+import {useEffect,useRef} from 'react';
+const home=()=>({tab:'explore',chat:null,modal:null,detail:null,shareOptions:false});
+const key=n=>[n.tab,n.chat?.id||'',n.modal==='profile'?'profile':n.modal?.id|| (n.modal?'new':''),n.detail?.id||'',n.shareOptions?'share':''].join('|');
+// Store UI snapshots in memory; put only navigation IDs in browser history.
+export default function useBackNavigation(nav,restore){const current=useRef(nav),restoreRef=useRef(restore),snapshots=useRef(new Map()),last=useRef(''),skip=useRef(false),started=useRef(false);current.current=nav;restoreRef.current=restore;
+useEffect(()=>{const installed=window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;const id=crypto.randomUUID();snapshots.current.set(id,home());history.replaceState({...history.state,kosrentNavigation:id},'');if(installed)history.pushState({kosrentNavigation:id},'');started.current=true;last.current=key(home());function pop(e){let target=snapshots.current.get(e.state?.kosrentNavigation);const now=current.current;if(!target){if(!installed)return;target=home()}
+// A hardware back from a thread returns to the chat list, not the property card.
+if(now.chat&&now.tab==='messages'&&!now.modal&&!now.detail&&!now.shareOptions){target={...home(),tab:'messages'};const id=crypto.randomUUID();snapshots.current.set(id,target);history.replaceState({kosrentNavigation:id},'')}
+if(installed&&key(now)===key(home())&&key(target)===key(home())){target=home();const id=crypto.randomUUID();snapshots.current.set(id,target);history.pushState({kosrentNavigation:id},'')}
+skip.current=true;last.current=key(target);restoreRef.current(target)}window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop)},[]);
+useEffect(()=>{if(!started.current)return;const signature=key(nav);if(skip.current){skip.current=false;if(signature===last.current)return}if(signature===last.current)return;const id=crypto.randomUUID();const previous=snapshots.current.get(history.state?.kosrentNavigation);snapshots.current.set(id,nav);if(previous?.modal&&previous.modal!=='profile'&&!nav.modal&&nav.tab==='mine')history.replaceState({kosrentNavigation:id},'');else history.pushState({kosrentNavigation:id},'');last.current=signature},[nav.tab,nav.chat?.id,nav.modal,nav.detail?.id,nav.shareOptions]);
+return ()=>{if(history.state?.kosrentNavigation)history.back();else restoreRef.current(home())};}
