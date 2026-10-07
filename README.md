@@ -63,3 +63,11 @@ Buyers and sellers can report listings and conversations, and block conversation
 KosRent accepts house rentals only, with 1/2/3 BHK, exact address, monthly rent and a non-negative deposit. Area is in sq ft. Approved rentals appear on Home; marking a home rented hides it from new searches. Legacy sale listings are retained but excluded from rental screens. Two entry points support finding a home or listing one for rent. No paid plans or payments are enabled.
 
 KosRent interface language is English only. Language switching is disabled; user-entered listing content is preserved as entered.
+
+## Kosamba-only PWA
+
+KosRent now serves rentals in Kosamba, Surat only. The home screen has two large actions followed by available rentals. Location selectors are removed; the listing form and server require Kosamba/Surat. Existing out-of-town listings remain stored but do not appear on the public feed. Google sign-in settings and your domain stay unchanged.
+
+PWA files are in `public/manifest.webmanifest`, `public/sw.js`, `public/offline.html`, and `public/icons/`. Deploy over HTTPS. On Android Chrome, use the download icon when an installation prompt is available, or the browser's Install app / Add to Home screen menu. On iPhone, use Safari → Share → Add to Home Screen. Installation UI depends on browser/device support. Test on real devices after Railway deployment. The offline screen is available, but current listings, accounts and messages require a connection. The worker does not cache API or OAuth traffic.
+
+For Google Play, package the deployed PWA as an Android Trusted Web Activity (for example using Bubblewrap) or use a suitable Android wrapper. A Play Console account, signed Android App Bundle, verified domain association (`.well-known/assetlinks.json` for a TWA), privacy policy, Data safety declarations and applicable store testing/review are separate release steps. No Android bundle or Play Store release has been created in this update.
