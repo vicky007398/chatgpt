@@ -95,3 +95,7 @@ KosRent is free until an explicit later code update. Renewal collection is disab
 ## Immediate publication
 
 Valid new Kosamba rental listings publish immediately, without administrator approval. Active listing edits stay public. Existing pending Kosamba house rentals are released when the updated server starts. Removed, rejected and rented listings are not restored by this migration or an ordinary owner edit. Reporting and administrator removal remain available. Listings are owner-provided and are not verified by KosRent.
+
+## Installed mobile display
+
+The manifest requests fullscreen, with standalone fallback for compatible browsers. viewport-fit=cover, dynamic viewport sizing and safe-area insets support varied phone dimensions and notches. iOS home-screen metadata is supplied, but system status/navigation bars and display-mode support are controlled by the OS/browser. No guarantee of immersive fullscreen on every mobile platform. After deployment, existing installs may update their manifest asynchronously; reopening or reinstalling may be needed to pick up a new display mode. Browser-simulated checks covered 320/360/390/430-pixel phones, tablet and landscape, admin controls, bottom navigation, full-height form and viewport resizing. Validate actual installed behaviour on Android and iPhone before claiming device-specific results.
