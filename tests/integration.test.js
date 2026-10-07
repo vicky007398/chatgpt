@@ -1,0 +1,33 @@
+// Run only against an isolated database. Requires TEST_DATABASE_URL,
+// TEST_APP_URL and TEST_SESSION_SECRET matching the running test server.
+import test from 'node:test';import assert from 'node:assert/strict';import pg from 'pg';import signature from 'cookie-signature';import {randomUUID} from 'node:crypto';
+const url=process.env.TEST_APP_URL;const secret=process.env.TEST_SESSION_SECRET;
+test('database-backed marketplace permissions and persistence',async()=>{assert.ok(process.env.TEST_DATABASE_URL&&url&&secret,'Set the TEST_* variables; never target production.');const db=new pg.Pool({connectionString:process.env.TEST_DATABASE_URL});const prefix=randomUUID();const ids={seller:prefix+'s',buyer:prefix+'b',outsider:prefix+'o',admin:prefix+'a'};const cookies={};const created=[];
+async function request(route,who,method='GET',body){const headers={Origin:url};if(who)headers.Cookie=cookies[who];if(!(body instanceof FormData))headers['Content-Type']='application/json';const r=await fetch(url+'/api'+route,{method,headers,body:body?body instanceof FormData?body:JSON.stringify(body):undefined});return {status:r.status,data:await r.json()}}
+try{await fetch(url+'/auth/google',{redirect:'manual'});for(const [role,id] of Object.entries(ids)){await db.query('INSERT INTO users(id,email,name) VALUES($1,$2,$3)',[id,role==='admin'?'integration-admin@example.com':`${role}-${prefix}@example.com`,role]);const sid=randomUUID();await db.query('INSERT INTO session(sid,sess,expire) VALUES($1,$2,NOW()+INTERVAL \'1 hour\')',[sid,{cookie:{originalMaxAge:3600000,httpOnly:true,secure:false,sameSite:'lax'},user:id,admin:role==='admin'}]);cookies[role]='connect.sid='+encodeURIComponent('s:'+signature.sign(sid,secret))}
+assert.equal((await request('/mine')).status,401);
+const f=new FormData();f.append('photos',new Blob([Buffer.from([137,80,78,71,13,10,26,10,0])],{type:'image/png'}),'test.png');const up=await request('/photos','seller','POST',f);assert.equal(up.status,201);const photo=up.data.photos[0];const listing={title:'Quiet family home',type:'House',district:'Ahmedabad',village:'Bopal',price:5000000,area:1500,unit:'sq ft',name:'Owner',phone:'9876543210',description:'A peaceful home.',photos:[photo]};let r=await request('/listings','seller','POST',listing);assert.equal(r.status,201);const id=r.data.id;created.push(id);
+assert.ok(!(await request('/listings')).data.some(x=>x.id===id),'pending not public');assert.equal((await request('/listings/'+id,'outsider','PUT',listing)).status,400); // outsider does not own image
+assert.equal((await request('/admin/listings/'+id,'admin','POST',{status:'approved'})).status,200);let publicListing=(await request('/listings')).data.find(x=>x.id===id);assert.ok(publicListing);assert.equal(publicListing.phone,undefined);
+assert.equal((await request('/favourites/'+id,'buyer','POST',{})).status,200);assert.ok((await request('/favourites','buyer')).data.includes(id));assert.equal((await request('/favourites/'+id,'buyer','DELETE',{})).status,200);
+
+assert.equal((await request('/conversations','seller','POST',{listing:id})).status,400);
+r=await request('/conversations','buyer','POST',{listing:id});assert.equal(r.status,200);const cid=r.data.id;
+assert.equal((await request(`/conversations/${cid}/messages`,'outsider')).status,404);
+assert.equal((await request(`/conversations/${cid}/messages`,'buyer','POST',{body:'Hello, can I arrange a visit?'})).status,201);
+assert.equal((await request(`/conversations/${cid}/messages`,'seller')).data.length,1);
+assert.equal((await request(`/conversations/${cid}/messages`,'buyer','POST',{body:'Call 9876543210'})).status,400);
+assert.equal((await request(`/conversations/${cid}/block`,'seller','POST',{})).status,200);
+assert.equal((await request(`/conversations/${cid}/messages`,'buyer','POST',{body:'Another message'})).status,403);
+assert.equal((await request(`/conversations/${cid}/block`,'buyer','POST',{})).status,403);
+assert.equal((await request(`/conversations/${cid}/block`,'seller','POST',{})).status,200);
+assert.equal((await request('/conversations','buyer')).data[0].data.phone,undefined);
+assert.equal((await request('/reports','buyer','POST',{listing:id,reason:'Please check these details'})).status,201);
+assert.equal((await request('/admin/listings','buyer')).status,403);
+assert.equal((await request('/listings/'+id,'seller','PUT',{...listing,price:6000000})).status,200);
+assert.ok(!(await request('/listings')).data.some(x=>x.id===id));assert.equal((await request('/admin/listings/'+id,'admin','POST',{status:'approved'})).status,200);assert.equal((await request('/listings')).data.find(x=>x.id===id).price,6000000);
+assert.equal((await request('/listings/'+id+'/sold','seller','PATCH',{})).status,200);
+assert.equal((await request('/conversations','outsider','POST',{listing:id})).status,404);
+const cross=await fetch(url+'/api/listings/'+id,{method:'DELETE',headers:{Origin:'https://evil.example',Cookie:cookies.seller}});assert.equal(cross.status,403);
+console.log('Verified listing persistence, edit review, private phone redaction, participant access, contact blocking, conversation blocking, reports, sold status, origin checks.');
+}finally{for(const id of created){await db.query('DELETE FROM favourites WHERE listing=$1',[id]);await db.query('DELETE FROM reports WHERE listing=$1',[id]);await db.query('DELETE FROM messages WHERE conversation IN (SELECT id FROM conversations WHERE listing=$1)',[id]);await db.query('DELETE FROM conversations WHERE listing=$1',[id]);await db.query('DELETE FROM listings WHERE id=$1',[id])}for(const id of Object.values(ids)){await db.query('DELETE FROM photos WHERE owner=$1',[id]);await db.query('DELETE FROM users WHERE id=$1',[id])}await db.end()}});
