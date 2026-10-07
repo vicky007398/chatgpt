@@ -1,4 +1,4 @@
-# Le Vech — Railway deployment
+# KosRent — Railway deployment
 
 React + Node.js + PostgreSQL property marketplace for Gujarat. Google accounts, shared listings, owner edits, administrator review, private in-app messaging, photo uploads, saved favourites, and English/Gujarati interface. No payments, commissions, WhatsApp integration, or SMS OTP.
 
@@ -28,7 +28,7 @@ Add your Railway origin as an authorised JavaScript origin and this exact author
 https://YOUR-RAILWAY-DOMAIN/auth/google/callback
 ```
 
-Copy its client ID and client secret into Railway variables. While the OAuth app is in testing mode, add your Google email and other testers as test users. Configure its audience/publishing status before allowing the public to sign in. No Google password is entered into Le Vech.
+Copy its client ID and client secret into Railway variables. While the OAuth app is in testing mode, add your Google email and other testers as test users. Configure its audience/publishing status before allowing the public to sign in. No Google password is entered into KosRent.
 
 ## VS Code / Windows
 
@@ -58,3 +58,6 @@ Buyers and sellers can report listings and conversations, and block conversation
 ## Checks
 
 `npm run build` builds the UI. `node --check server/index.js` checks server syntax. `node --test tests/integration.test.js` runs database-backed API checks against an isolated test database with a running server; see the test file for required environment variables. Never use production data for tests.
+
+## Rental-only update
+KosRent accepts house rentals only, with 1/2/3 BHK, exact address, monthly rent and a non-negative deposit. Area is in sq ft. Approved rentals appear on Home; marking a home rented hides it from new searches. Legacy sale listings are retained but excluded from rental screens. Two entry points support finding a home or listing one for rent. No paid plans or payments are enabled.
