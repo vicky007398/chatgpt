@@ -23,3 +23,20 @@ html{min-height:100%;scroll-padding-bottom:100px}body{min-height:100vh;min-heigh
 @media(max-width:700px){.chat-app{display:block;height:calc(100dvh - 162px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:160px;margin:0;border-radius:0;border:0;width:100%}.chat-list{height:100%;border:0}.chat-thread{height:100%}.chat-app:not(.has-conversation) .chat-welcome{display:none}.chat-app.has-conversation .chat-list{display:none}.thread-header button{display:grid;place-items:center}.chat-list-row{min-height:94px;padding:17px}.chat-list h2{margin:20px}.thread-messages{padding:14px 12px}.thread-header .chat-avatar{height:40px;width:40px}.thread-compose{padding:9px 10px}.message-bubble{max-width:88%}}
 @media(min-width:701px){.chat-app{height:calc(100dvh - 210px);min-height:280px}}
 @media(max-height:500px){.chat-app{margin:0 auto;height:calc(100dvh - 162px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:0}.thread-header{padding:7px 12px}.thread-compose{padding:6px}.chat-app .thread-header .chat-avatar{height:32px;width:32px}}
+
+/* Keep touch scrolling natural without page pinch or double-tap zoom. */
+html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Give each posted rental a distinct, readable card. */
+.property{border:2px solid #b8ccc2;border-radius:18px;box-shadow:0 4px 14px #123b3210}
+.property:hover{border-color:#739b87;box-shadow:0 8px 22px #123b3218}
+.property-body{padding:18px}
+.property-title{display:block;width:100%;text-align:left;font-size:18px;font-weight:700;line-height:1.4;letter-spacing:-.3px;color:#173f34}
+.property .price{font-size:25px;font-weight:700;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.property .price>span,.property .per-month{font-size:12px;font-weight:500;letter-spacing:0}
+.property .location{font-size:13px;line-height:1.6;color:#52675d}
+.property .rent-deposit{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.property .owner-label{font-size:13px;font-weight:600}
+.property .tag{font-size:10px;letter-spacing:.4px;border:1px solid #cbdcd2;border-radius:7px}
+.property-bottom{border-top:1px solid #e1eae4;padding-top:12px}
+@media(max-width:600px),(pointer:coarse){input,select,textarea,.text-search input,.chat-search input{font-size:16px}}
+@media(max-width:340px){.property-body{padding:14px}.property .price{font-size:23px}}
