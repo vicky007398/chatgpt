@@ -3,7 +3,7 @@ import pg from 'pg';
 import session from 'express-session';
 import connectPg from 'connect-pg-simple';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import rateLimit,{ipKeyGenerator} from 'express-rate-limit';
 import multer from 'multer';
 import {OAuth2Client} from 'google-auth-library';
 import {randomUUID} from 'node:crypto';
@@ -23,8 +23,10 @@ CREATE TABLE IF NOT EXISTS messages(id TEXT PRIMARY KEY,conversation TEXT NOT NU
 CREATE TABLE IF NOT EXISTS favourites(owner TEXT NOT NULL REFERENCES users(id),listing TEXT NOT NULL REFERENCES listings(id),PRIMARY KEY(owner,listing));
 CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY,reporter TEXT NOT NULL REFERENCES users(id),listing TEXT REFERENCES listings(id),conversation TEXT REFERENCES conversations(id),reason TEXT NOT NULL,created TIMESTAMPTZ DEFAULT NOW());`);
 const app=express();app.set('trust proxy',1);app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'data:','https://images.unsplash.com'],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com']}}}));
-app.use('/api',rateLimit({windowMs:60000,limit:120}));app.use(express.json({limit:'100kb'}));
+app.use(express.json({limit:'100kb'}));
 const Store=connectPg(session);app.use(session({store:new Store({pool,createTableIfMissing:true}),secret:process.env.SESSION_SECRET,resave:false,saveUninitialized:false,cookie:{httpOnly:true,secure,sameSite:'lax',maxAge:7*86400000}}));
+const requestKey=req=>req.session?.user||ipKeyGenerator(req.ip);
+app.use('/api',rateLimit({windowMs:60000,limit:180,keyGenerator:requestKey,message:{error:'Too many requests. Please wait a minute.'}}));
 app.use('/api', (req,res,next)=>{if(!['GET','HEAD','OPTIONS'].includes(req.method)&&req.get('origin')!==origin)return res.status(403).json({error:'Invalid request origin'});next()});
 const asyncRoute=fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next);
 const adminEmails=()=>new Set((process.env.ADMIN_EMAILS||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean));
@@ -61,7 +63,7 @@ app.post('/api/conversations',auth,asyncRoute(async(req,res)=>{const {rows}=awai
 app.get('/api/conversations',auth,asyncRoute(async(req,res)=>{const {rows}=await pool.query('SELECT c.*,l.data FROM conversations c JOIN listings l ON l.id=c.listing WHERE c.buyer=$1 OR c.seller=$1',[req.user.id]);res.json(rows.map(r=>({...r,data:publicData(r.data)})))}));
 async function conversation(req,res){const {rows}=await pool.query('SELECT * FROM conversations WHERE id=$1 AND (buyer=$2 OR seller=$2)',[req.params.id,req.user.id]);if(!rows[0]){res.status(404).json({error:'Conversation not found'});return null}return rows[0]}
 app.get('/api/conversations/:id/messages',auth,asyncRoute(async(req,res)=>{if(!await conversation(req,res))return;const {rows}=await pool.query('SELECT id,sender,body,created FROM messages WHERE conversation=$1 ORDER BY created LIMIT 1000',[req.params.id]);res.json(rows)}));
-app.post('/api/conversations/:id/messages',auth,rateLimit({windowMs:60000,limit:20}),asyncRoute(async(req,res)=>{const c=await conversation(req,res);if(!c)return;if(c.blocked_by)return res.status(403).json({error:'This conversation is blocked'});const body=req.body.body;if(typeof body!=='string'||!body.trim()||body.length>2000)return res.status(400).json({error:'Write a message under 2,000 characters'});if(contact.test(body))return res.status(400).json({error:'Keep contact details private. Talk inside KosRent.'});await pool.query('INSERT INTO messages(id,conversation,sender,body) VALUES($1,$2,$3,$4)',[randomUUID(),c.id,req.user.id,body.trim()]);res.status(201).json({ok:true})}));
+app.post('/api/conversations/:id/messages',auth,rateLimit({windowMs:60000,limit:20,keyGenerator:requestKey,message:{error:'Please wait before sending more messages.'}}),asyncRoute(async(req,res)=>{const c=await conversation(req,res);if(!c)return;if(c.blocked_by)return res.status(403).json({error:'This conversation is blocked'});const body=req.body.body;if(typeof body!=='string'||!body.trim()||body.length>2000)return res.status(400).json({error:'Write a message under 2,000 characters'});if(contact.test(body))return res.status(400).json({error:'Keep contact details private. Talk inside KosRent.'});await pool.query('INSERT INTO messages(id,conversation,sender,body) VALUES($1,$2,$3,$4)',[randomUUID(),c.id,req.user.id,body.trim()]);res.status(201).json({ok:true})}));
 app.post('/api/conversations/:id/block',auth,asyncRoute(async(req,res)=>{const c=await conversation(req,res);if(!c)return;if(c.blocked_by&&c.blocked_by!==req.user.id)return res.status(403).json({error:'Only the person who blocked can unblock'});await pool.query('UPDATE conversations SET blocked_by=$1 WHERE id=$2',[c.blocked_by?null:req.user.id,c.id]);res.json({ok:true})}));
 app.post('/api/reports',auth,asyncRoute(async(req,res)=>{const reason=String(req.body.reason||'').trim();if(reason.length<3||reason.length>1000)return res.status(400).json({error:'Enter a report reason'});if(req.body.conversation){req.params.id=req.body.conversation;if(!await conversation(req,res))return}await pool.query('INSERT INTO reports(id,reporter,listing,conversation,reason) VALUES($1,$2,$3,$4,$5)',[randomUUID(),req.user.id,req.body.listing||null,req.body.conversation||null,reason]);res.status(201).json({ok:true})}));
 app.get('/api/admin/listings',auth,admin,asyncRoute(async(req,res)=>{const {rows}=await pool.query("SELECT * FROM listings WHERE status='pending' ORDER BY created");res.json(rows.map(mapListing))}));
