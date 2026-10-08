@@ -17,6 +17,7 @@ if(process.env.SESSION_SECRET.length<32)throw Error('SESSION_SECRET must contain
 const origin=new URL(process.env.APP_URL).origin;
 const secure=origin.startsWith('https:');
 const pool=new Pool({connectionString:process.env.DATABASE_URL});
+const sessionMaxAge=365*24*60*60*1000;
 await pool.query(`CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,email TEXT UNIQUE NOT NULL,name TEXT NOT NULL,blocked BOOLEAN NOT NULL DEFAULT FALSE);
 CREATE TABLE IF NOT EXISTS listings(id TEXT PRIMARY KEY,owner TEXT NOT NULL REFERENCES users(id),data JSONB NOT NULL,status TEXT NOT NULL DEFAULT 'pending',created TIMESTAMPTZ DEFAULT NOW());
 CREATE TABLE IF NOT EXISTS photos(id TEXT PRIMARY KEY,owner TEXT NOT NULL REFERENCES users(id),mime TEXT NOT NULL,body BYTEA NOT NULL,created TIMESTAMPTZ DEFAULT NOW());
@@ -36,7 +37,7 @@ CREATE INDEX IF NOT EXISTS messages_conversation_seq ON messages(conversation,se
 CREATE TABLE IF NOT EXISTS conversation_reads(conversation TEXT NOT NULL REFERENCES conversations(id),user_id TEXT NOT NULL REFERENCES users(id),last_seq BIGINT NOT NULL DEFAULT 0,PRIMARY KEY(conversation,user_id));`);
 const app=express();app.set('trust proxy',1);app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],imgSrc:["'self'",'data:','https://images.unsplash.com'],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com']}}}));
 app.use(express.json({limit:'100kb'}));
-const Store=connectPg(session);app.use(session({store:new Store({pool,createTableIfMissing:true}),secret:process.env.SESSION_SECRET,resave:false,saveUninitialized:false,cookie:{httpOnly:true,secure,sameSite:'lax',maxAge:7*86400000}}));
+const Store=connectPg(session);app.use(session({store:new Store({pool,createTableIfMissing:true}),secret:process.env.SESSION_SECRET,resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,secure,sameSite:'lax',maxAge:sessionMaxAge}}));
 const requestKey=req=>req.session?.user||ipKeyGenerator(req.ip);
 app.use('/api',rateLimit({windowMs:60000,limit:180,keyGenerator:requestKey,message:{error:'Too many requests. Please wait a minute.'}}));
 app.use('/api', (req,res,next)=>{if(!['GET','HEAD','OPTIONS'].includes(req.method)&&req.get('origin')!==origin)return res.status(403).json({error:'Invalid request origin'});next()});
