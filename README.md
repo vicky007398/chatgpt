@@ -44,7 +44,7 @@ Open http://localhost:3000. `npm run dev` is a frontend-only Vite server and is 
 
 ## Storage and security
 
-Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: five JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed with one-year rolling login sessions that last until logout or browser/app data clearing. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. Listing phone numbers are public on approved posts so renters can call directly. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
+Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: five JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed with one-year rolling login sessions that last until logout or browser/app data clearing. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. The home feed is visible without login; full details, owner phone numbers, calls, chats and listing creation require Google sign-in. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
 
 Buyers and sellers can report listings and conversations, and block conversations. Admins can remove reported listings. Contact-pattern filters reduce external contact sharing but cannot catch every disguised phone number or image. No attachments in chat.
 
@@ -74,7 +74,7 @@ For Google Play, package the deployed PWA as an Android Trusted Web Activity (fo
 
 ## Rental form fields
 
-Owner names are trimmed, repeated spaces removed, and words capitalised when saved. Choose one of the seven configured Kosamba localities, enter the exact address, upload up to five photos (3 MB each), choose furnishing, BHK/area, rent and deposit, and provide a mobile number. Optional Google Maps URLs are displayed as non-clickable reference text, not a navigable link. A user can still copy text; this is not an access restriction on the location. Existing listings need locality/furnishing selected when next edited. Public API responses include listing phone numbers for tap-to-call.
+Owner names are trimmed, repeated spaces removed, and words capitalised when saved. Choose one of the seven configured Kosamba localities, enter the exact address, upload up to five photos (3 MB each), choose furnishing, BHK/area, rent and deposit, and provide a mobile number. Optional Google Maps URLs are displayed as non-clickable reference text, not a navigable link. A user can still copy text; this is not an access restriction on the location. Existing listings need locality/furnishing selected when next edited. Authenticated listing responses include phone numbers for tap-to-call.
 
 ## Listing periods, manual UPI renewals and policies
 
