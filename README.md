@@ -44,7 +44,7 @@ Open http://localhost:3000. `npm run dev` is a frontend-only Vite server and is 
 
 ## Storage and security
 
-Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: six JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. Phone numbers are private and omitted from public listing and conversation responses. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
+Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: five JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. Phone numbers are private and omitted from public listing and conversation responses. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
 
 Buyers and sellers can report listings and conversations, and block conversations. Admins can remove reported listings. Contact-pattern filters reduce external contact sharing but cannot catch every disguised phone number or image. No attachments in chat.
 
