@@ -15,4 +15,10 @@ function WelcomeSplash(){
   <div className="welcome-loader" aria-hidden="true"><span/></div>
  </section>;
 }
-createRoot(document.getElementById('root')).render(<><Live/><AppUpdate/><WelcomeSplash/></>);
+function DailyScreenBorder(){
+ const colors=['#1f5c45','#c08b3e','#2f6f9f','#8b5e9f','#bf6b4a','#587a3f','#286a6f'];
+ const day=Math.floor(new Date().setHours(0,0,0,0)/86400000);
+ const color=colors[day%colors.length];
+ return <div className="daily-screen-border" style={{'--daily-border':color}} aria-hidden="true"/>;
+}
+createRoot(document.getElementById('root')).render(<><Live/><AppUpdate/><WelcomeSplash/><DailyScreenBorder/></>);
