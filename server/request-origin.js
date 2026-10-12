@@ -1,12 +1,18 @@
 // Browser scripts cannot send our custom header across sites without a CORS
 // preflight. This application does not grant credentialed cross-origin access.
-// Keep rejecting explicit foreign origins, including when the marker is present.
+// Fetch Metadata is browser-controlled: scripts cannot forge Sec-Fetch-Site.
+// Recognise the existing visibility header so already-open app versions work too.
 export function requestOriginAllowed(req,expectedOrigin) {
   if(['GET','HEAD','OPTIONS'].includes(req.method))return true;
   const source=req.get('Origin');
+  const site=req.get('Sec-Fetch-Site');
+  if(site==='cross-site')return false;
+  const marked=req.get('X-KosRent-Request')==='1'||['0','1'].includes(req.get('X-KosRent-Visible'));
+  // Browser-controlled same-origin metadata also supports older installed pages
+  // that predate our custom headers, without trusting another website.
+  if(site==='same-origin')return true;
   if(source&&source!=='null')return source===expectedOrigin;
-  if(req.get('Sec-Fetch-Site')==='cross-site')return false;
-  return req.get('X-KosRent-Request')==='1';
+  return marked;
 }
 
 export function protectRequestOrigin(origin) {

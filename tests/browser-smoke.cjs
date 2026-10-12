@@ -27,6 +27,10 @@ let browser;
   browser=await chromium.launch({executablePath:process.env.CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
   async function context(user){
    const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});
+   if(process.env.TEST_LEGACY_ORIGIN==='1')await ctx.route('**/api/**',async route=>{
+    const headers=await route.request().allHeaders();delete headers['x-kosrent-request'];delete headers['x-kosrent-visible'];
+    await route.continue({headers});
+   });
    await ctx.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
    await ctx.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[user],secret)),domain:new URL(url).hostname,path:'/'}]);
    return ctx;
@@ -36,7 +40,8 @@ let browser;
   await page.goto(url);await page.getByRole('button',{name:'Chats',exact:true}).click();
   // Reproduce installed-browser read requests that report an opaque origin.
   await page.route('**/api/conversations/*/read',async route=>{
-   const headers=await route.request().allHeaders();assert.equal(headers['x-kosrent-request'],'1');
+   const headers=await route.request().allHeaders();assert.equal(headers['x-kosrent-visible'],'1');
+   if(process.env.TEST_LEGACY_ORIGIN==='1'){delete headers['x-kosrent-request'];delete headers['x-kosrent-visible']}else assert.equal(headers['x-kosrent-request'],'1');
    await route.continue({headers:{...headers,origin:'null'}});
   });
   const readResponse=page.waitForResponse(r=>r.url().endsWith('/read')&&r.request().method()==='POST').catch(()=>null);
