@@ -10,7 +10,7 @@ React + Node.js + PostgreSQL property marketplace for Gujarat. Google accounts, 
 4. Add these app service variables:
    - `SESSION_SECRET`: generate a random secret with at least 32 characters, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Keep it private and stable across deploys.
    - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: from the Google OAuth web application described below.
-   - `APP_URL`: the complete HTTPS public app origin, e.g. `https://your-service.up.railway.app`, without a trailing slash.
+   - `APP_URL`: the complete HTTPS public app origin, e.g. `https://kosrent.vedtechnologies.co.in`, without a trailing slash.
    - `ADMIN_EMAILS`: comma-separated Google email addresses allowed to review listings. Use your own Google email.
 5. Generate a public domain in the app service's Networking settings. Set `APP_URL` to that domain, then redeploy if necessary.
 6. Railway uses `npm run build` and `npm start`; `/api/health` checks database connectivity. Tables are created on first startup. Never commit `.env` or credentials.
@@ -25,7 +25,7 @@ In Google Cloud Console, create a project, configure the OAuth consent screen (G
 Add your Railway origin as an authorised JavaScript origin and this exact authorised redirect URI:
 
 ```
-https://YOUR-RAILWAY-DOMAIN/auth/google/callback
+https://kosrent.vedtechnologies.co.in/auth/google/callback
 ```
 
 Copy its client ID and client secret into Railway variables. While the OAuth app is in testing mode, add your Google email and other testers as test users. Configure its audience/publishing status before allowing the public to sign in. No Google password is entered into KosRent.

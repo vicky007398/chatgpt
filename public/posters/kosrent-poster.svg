@@ -45,7 +45,7 @@
 
     <g transform="translate(78 720)">
       <rect x="0" y="0" width="360" height="360" rx="34" fill="#f6f8f3" stroke="#d7e3d0" stroke-width="3"/>
-      <image x="38" y="38" width="284" height="284" href="https://api.qrserver.com/v1/create-qr-code/?size=284x284&amp;margin=12&amp;data=https%3A%2F%2Fkosrent.up.railway.app"/>
+      <image x="38" y="38" width="284" height="284" href="https://api.qrserver.com/v1/create-qr-code/?size=284x284&amp;margin=12&amp;data=https%3A%2F%2Fkosrent.vedtechnologies.co.in"/>
       <text x="180" y="404" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="22" font-weight="700" fill="#123b32">Scan to open</text>
     </g>
 
@@ -55,7 +55,7 @@
       <text x="0" y="107" font-family="DM Sans, Arial, sans-serif" font-size="34" font-weight="800" fill="#123b32">For owners</text>
       <text x="0" y="151" font-family="DM Sans, Arial, sans-serif" font-size="25" font-weight="500" fill="#667762">List your rental home free.</text>
       <rect x="0" y="210" width="330" height="76" rx="22" fill="#e8f2e6"/>
-      <text x="165" y="258" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="27" font-weight="800" fill="#123b32">kosrent.up.railway.app</text>
+      <text x="165" y="258" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="20" font-weight="800" fill="#123b32">kosrent.vedtechnologies.co.in</text>
     </g>
 
     <text x="540" y="1130" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="26" font-weight="700" fill="#123b32">Find rent rooms in Kosamba | KosRent | Install app</text>
