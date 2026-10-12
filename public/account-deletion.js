@@ -14,7 +14,7 @@ form.addEventListener('submit',async event=>{
   const button=form.querySelector('button');button.disabled=true;
   status.textContent='Deleting your account…';
   try{
-    const response=await fetch('/api/account',{method:'DELETE',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirmation:'DELETE'})});
+    const response=await fetch('/api/account',{method:'DELETE',credentials:'same-origin',headers:{'Content-Type':'application/json','X-KosRent-Request':'1'},body:JSON.stringify({confirmation:'DELETE'})});
     const result=await response.json();
     if(!response.ok)throw Error(result.error||'Deletion failed. Please try again.');
     try{localStorage.removeItem('lv-live-saved');sessionStorage.removeItem('kosrent-welcome-shown')}catch{}

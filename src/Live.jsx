@@ -5,7 +5,7 @@ import {PolicyLinks} from './Billing.jsx';
 import React,{useState,useEffect} from 'react';
 import {House,Plus,Search,MapPin,Heart,MessageCircle,ArrowRight,X,Send,ShieldCheck,UserRound,LogIn,LogOut,LayoutGrid,Trees,LandPlot,Building2,SlidersHorizontal,Flag,Pencil,Trash2,CheckCircle,ArrowLeft,BedDouble,Wallet,IndianRupee,KeyRound,Download,Share2,Copy,Phone} from 'lucide-react';
 
-export async function api(url,opts={}){const res=await fetch('/api'+url,{...opts,headers:{'X-KosRent-Visible':document.hidden?'0':'1',...(opts.body instanceof FormData?{}:{'Content-Type':'application/json'})},credentials:'same-origin'});const d=await res.json();if(!res.ok)throw Error(d.error||'Request failed');return d}
+export async function api(url,opts={}){const res=await fetch('/api'+url,{...opts,headers:{'X-KosRent-Request':'1','X-KosRent-Visible':document.hidden?'0':'1',...(opts.body instanceof FormData?{}:{'Content-Type':'application/json'})},credentials:'same-origin'});const d=await res.json();if(!res.ok)throw Error(d.error||'Request failed');return d}
 const rentalAreas=['Gokuldham', 'Ayodhya Gate', 'Zanda chowk', 'Jalaram chowk', 'Old kosamba', 'Tiranga chowk', 'Dadari Road'];
 const formatOwnerName=value=>value.trim().replace(/\s+/g,' ').toLocaleLowerCase('en-IN').replace(/(^|[\s\-’'])\p{L}/gu,part=>part.toLocaleUpperCase('en-IN'));
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);

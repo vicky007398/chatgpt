@@ -1,3 +1,4 @@
+import {protectRequestOrigin} from './request-origin.js';
 import {registerAnalytics} from './analytics.js';
 import {registerAndroid} from './android.js';
 import {registerAccounts} from './accounts.js';
@@ -45,7 +46,7 @@ app.use(express.json({limit:'100kb'}));
 const Store=connectPg(session);app.use(session({store:new Store({pool,createTableIfMissing:true}),secret:process.env.SESSION_SECRET,resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,secure,sameSite:'lax',maxAge:sessionMaxAge}}));
 const requestKey=req=>req.session?.user||ipKeyGenerator(req.ip);
 app.use('/api',rateLimit({windowMs:60000,limit:180,keyGenerator:requestKey,message:{error:'Too many requests. Please wait a minute.'}}));
-app.use('/api', (req,res,next)=>{if(!['GET','HEAD','OPTIONS'].includes(req.method)&&req.get('origin')!==origin)return res.status(403).json({error:'Invalid request origin'});next()});
+app.use('/api',protectRequestOrigin(origin));
 const asyncRoute=fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next);
 const adminEmails=()=>new Set((process.env.ADMIN_EMAILS||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean));
 const auth=asyncRoute(async(req,res,next)=>{if(!req.session.user)return res.status(401).json({error:'Sign in with Google first'});const {rows}=await pool.query('SELECT * FROM users WHERE id=$1',[req.session.user]);if(!rows[0]||rows[0].blocked)return res.status(403).json({error:'Account unavailable'});req.user=rows[0];next()});

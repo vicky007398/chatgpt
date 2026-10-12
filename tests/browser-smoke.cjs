@@ -23,6 +23,7 @@ let browser;
   }
   await db.query('INSERT INTO listings(id,owner,data,status) VALUES($1,$2,$3,$4)',[listing,owner,{title:'Sample Kosamba rental',name:'Sample owner',purpose:'rent',type:'House',configuration:'2 BHK',district:'Surat',village:'Kosamba',locality:'Gokuldham',address:'Sample address',price:8000,deposit:16000,unit:'sq ft',area:800,furnishing:'Unfurnished',phone:'9876543210'},'approved']);
   await db.query('INSERT INTO conversations(id,listing,buyer,seller) VALUES($1,$2,$3,$4)',[conversation,listing,buyer,owner]);
+  await db.query('INSERT INTO messages(id,conversation,sender,body) VALUES($1,$2,$3,$4)',[randomUUID(),conversation,buyer,'Hello, is this home available?']);
   browser=await chromium.launch({executablePath:process.env.CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
   async function context(user){
    const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});
@@ -33,7 +34,16 @@ let browser;
   const seller=await context(owner),renter=await context(buyer);
   const page=await seller.newPage(),recipient=await renter.newPage();
   await page.goto(url);await page.getByRole('button',{name:'Chats',exact:true}).click();
+  // Reproduce installed-browser read requests that report an opaque origin.
+  await page.route('**/api/conversations/*/read',async route=>{
+   const headers=await route.request().allHeaders();assert.equal(headers['x-kosrent-request'],'1');
+   await route.continue({headers:{...headers,origin:'null'}});
+  });
+  const readResponse=page.waitForResponse(r=>r.url().endsWith('/read')&&r.request().method()==='POST').catch(()=>null);
   await page.locator('.chat-list-row').filter({hasText:'Sample Kosamba rental'}).click();
+  const read=await readResponse;assert.ok(read,'chat read request must complete');
+  console.log('Browser read origin:',(await read.request().allHeaders()).origin,'status:',read.status());
+  assert.equal(read.status(),200,'opening an existing chat must mark messages read');
   await page.getByRole('button',{name:'Block user',exact:true}).click();
   await page.getByRole('button',{name:'Unblock user',exact:true}).waitFor();
   assert.equal(await page.getByRole('textbox',{name:'Message',exact:true}).isDisabled(),true);
