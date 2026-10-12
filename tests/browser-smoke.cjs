@@ -9,15 +9,15 @@ const fs=require('node:fs');
 const url=process.env.TEST_APP_URL,secret=process.env.TEST_SESSION_SECRET;
 assert.ok(url&&secret&&process.env.TEST_DATABASE_URL,'Set isolated TEST_* variables');
 const db=new pg.Pool({connectionString:process.env.TEST_DATABASE_URL});
-const owner=randomUUID(),buyer=randomUUID(),listing=randomUUID(),conversation=randomUUID();
+const owner=randomUUID(),buyer=randomUUID(),admin=randomUUID(),listing=randomUUID(),conversation=randomUUID();
 let browser;
 (async()=>{
  try {
   // Initialise the session table through the real application's login route.
   await fetch(url+'/auth/google',{redirect:'manual'});
   const sessionIds={};
-  for(const [id,name] of [[owner,'Sample owner'],[buyer,'Sample renter']]){
-   await db.query('INSERT INTO users(id,email,name) VALUES($1,$2,$3)',[id,id+'@example.com',name]);
+  for(const [id,name] of [[owner,'Sample owner'],[buyer,'Sample renter'],[admin,'Test administrator']]){
+   await db.query('INSERT INTO users(id,email,name) VALUES($1,$2,$3)',[id,id===admin?'integration-admin@example.com':id+'@example.com',name]);
    const sid=randomUUID();sessionIds[id]=sid;
    await db.query("INSERT INTO session(sid,sess,expire) VALUES($1,$2,NOW()+INTERVAL '1 hour')",[sid,{cookie:{originalMaxAge:3600000,httpOnly:true,secure:false,sameSite:'lax'},user:id}]);
   }
@@ -51,6 +51,14 @@ let browser;
   // Verify added controls still fit a narrow phone viewport.
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
   if(process.env.TEST_SCREENSHOT_DIR){fs.mkdirSync(process.env.TEST_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:process.env.TEST_SCREENSHOT_DIR+'/chat-test.png'});}
+  const adminContext=await context(admin),adminPage=await adminContext.newPage();
+  await adminPage.goto(url);await adminPage.getByRole('button',{name:'Profile',exact:true}).last().click();
+  await adminPage.getByRole('button',{name:'Usage analytics',exact:true}).click();
+  await adminPage.getByRole('heading',{name:'Usage analytics',exact:true}).waitFor();
+  await adminPage.getByText('Registered users',{exact:true}).waitFor();
+  assert.equal(await adminPage.locator('.analytics-table tbody tr').count(),30);
+  assert.ok(await adminPage.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+  if(process.env.TEST_SCREENSHOT_DIR)await adminPage.screenshot({path:process.env.TEST_SCREENSHOT_DIR+'/analytics-test.png'});
   await page.getByRole('button',{name:'Profile',exact:true}).last().click();
   await page.getByRole('link',{name:'Delete account',exact:true}).click();
   await page.getByText('Signed in as '+owner+'@example.com',{exact:true}).waitFor();
@@ -61,7 +69,7 @@ let browser;
   assert.equal((await db.query('SELECT id FROM users WHERE id=$1',[buyer])).rowCount,1);
   await page.reload();await page.getByRole('link',{name:'Continue with Google, then return to this page'}).waitFor();
   assert.match(await page.getByRole('link',{name:'Continue with Google, then return to this page'}).getAttribute('href'),/returnTo=delete-account/);
-  console.log('Browser smoke passed: mobile block/unblock/report, participant composer protection, Profile deletion, permanent deletion and signed-out state.');
+  console.log('Browser smoke passed: private mobile admin analytics, block/unblock/report, participant composer protection, Profile deletion, permanent deletion and signed-out state.');
  } finally {
   if(browser)await browser.close();
   await db.query('DELETE FROM reports WHERE listing=$1 OR conversation=$2',[listing,conversation]);
@@ -71,7 +79,7 @@ let browser;
   await db.query('DELETE FROM favourites WHERE listing=$1',[listing]);
   await db.query('DELETE FROM renewals WHERE listing=$1',[listing]);
   await db.query('DELETE FROM listings WHERE id=$1',[listing]);
-  for(const id of [owner,buyer]){
+  for(const id of [owner,buyer,admin]){
    await db.query('DELETE FROM user_blocks WHERE blocker=$1 OR blocked=$1',[id]);
    await db.query("DELETE FROM session WHERE sess->>'user'=$1",[id]);
    await db.query('DELETE FROM users WHERE id=$1',[id]);

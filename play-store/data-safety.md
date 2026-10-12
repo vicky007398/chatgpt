@@ -10,6 +10,7 @@ This describes the inspected code, not a completed Play Console declaration. Con
 | Property photos, description and listing content | Owner-submitted content displayed with the listing. Users should not upload sensitive documents. |
 | Private in-app messages and read cursors | Messaging between participants and unread counts. Messages are stored on the server and are not end-to-end encrypted. |
 | Favourites, reports, blocked-user records, policy acceptance | Saved homes, safety/moderation and consent records. |
+| Account-linked daily activity | Admin usage analytics. One account/day, retained up to 90 days and removed on account deletion. No guest analytics identifiers; website and Android usage combined. |
 | Session cookie and infrastructure metadata | Authentication, rate limiting, security and operation. Confirm actual hosting access logs and retention. |
 | Historical UPI references | Legacy records may exist; current free-launch code refuses renewal payments. No banking passwords or payment PINs are collected. |
 
