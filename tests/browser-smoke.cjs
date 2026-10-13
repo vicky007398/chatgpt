@@ -36,6 +36,56 @@ const loginAttempts=[];
    await ctx.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[user],secret)),domain:new URL(url).hostname,path:'/'}]);
    return ctx;
   }
+  // A slow session check must not treat an already signed-in app as a guest,
+  // consume its shared-home link, or show a second login sheet after a tap.
+  const hydrationContext=await context(buyer);
+  const hydrationPage=await hydrationContext.newPage();
+  let releaseHydration,sessionRequested;
+  const hydrationGate=new Promise(resolve=>{releaseHydration=resolve;});
+  const hydrationStarted=new Promise(resolve=>{sessionRequested=resolve;});
+  await hydrationPage.route('**/api/me',async route=>{
+   sessionRequested();await hydrationGate;await route.continue();
+  });
+  await hydrationPage.goto(url+'/?listing='+listing);
+  await hydrationStarted;
+  await hydrationPage.getByRole('button',{name:'Chats',exact:true}).click();
+  await hydrationPage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(resolve)));
+  assert.equal(await hydrationPage.getByRole('dialog',{name:'Login required',exact:true}).count(),0,'session hydration must not display a guest login prompt');
+  releaseHydration();
+  await hydrationPage.getByRole('dialog',{name:'Property',exact:true}).waitFor();
+  assert.equal(await hydrationPage.getByRole('dialog',{name:'Login required',exact:true}).count(),0,'authenticated shared home opens without a second login prompt');
+  await hydrationPage.getByRole('dialog',{name:'Property',exact:true}).getByRole('heading',{name:'Sample Kosamba rental',exact:true}).waitFor();
+  await hydrationContext.close();
+  console.log('Slow session hydration passed: early Chats tap stays quiet and authenticated shared home opens.');
+  // The bootstrap response can have been captured before OAuth rotated the
+  // session. Deliver that old guest result after focus restores the real login.
+  const staleContext=await context(buyer);
+  const stalePage=await staleContext.newPage();
+  let releaseBootstrap,bootstrapRequested,sessionChecks=0;
+  const bootstrapGate=new Promise(resolve=>{releaseBootstrap=resolve;});
+  const bootstrapStarted=new Promise(resolve=>{bootstrapRequested=resolve;});
+  await stalePage.route('**/api/me',async route=>{
+   if(++sessionChecks===1){
+    bootstrapRequested();await bootstrapGate;
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({user:null})});
+   }else await route.continue();
+  });
+  await stalePage.goto(url);
+  await bootstrapStarted;
+  const restoredResponse=stalePage.waitForResponse(response=>response.url().endsWith('/api/me'));
+  await stalePage.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  const restored=await restoredResponse;
+  assert.equal((await restored.json()).user.id,buyer,'focus rechecks the current signed-in session');
+  await stalePage.getByRole('button',{name:'Profile',exact:true}).first().click();
+  await stalePage.getByRole('heading',{name:'Sample renter',exact:true}).waitFor();
+  const lateResponse=stalePage.waitForResponse(response=>response.url().endsWith('/api/me'));
+  releaseBootstrap();await lateResponse;
+  await stalePage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await stalePage.getByRole('heading',{name:'Sample renter',exact:true}).isVisible(),true,'late guest bootstrap must not replace a restored signed-in user');
+  assert.equal(await stalePage.getByRole('link',{name:'Continue with Google',exact:true}).count(),0,'late guest bootstrap must not request login again');
+  assert.equal(await stalePage.getByRole('dialog',{name:'Login required',exact:true}).count(),0);
+  await staleContext.close();
+  console.log('Stale guest bootstrap passed: a newer authenticated focus response remains signed in.');
   // Simulate only Google's successful handoff; exercise the real completion page
   // and installed-app session refresh without using real Google credentials.
   const loginContext=await browser.newContext({viewport:{width:390,height:844}});

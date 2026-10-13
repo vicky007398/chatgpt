@@ -33,7 +33,10 @@ test('account deletion protects other users and removes linked records; blocking
     const completion=await fetch(url+'/auth/complete',{headers:{Cookie:cookies[owner]}});
     assert.equal(completion.status,200);
     assert.equal(completion.headers.get('cache-control'),'no-store');
-    assert.match(await completion.text(),/auth-return.js/);
+    const completionHtml=await completion.text();
+    assert.match(completionHtml,/auth-return.js/);
+    assert.match(completionHtml,/id="return-to-app"/);
+    assert.doesNotMatch(completionHtml,/<a[^>]*href="\/"/,'app return must not open the website inside the sign-in browser');
     const start=await fetch(url+'/auth/google?popup=1',{redirect:'manual'});
     assert.equal(start.status,302);
     const oauthLocation=new URL(start.headers.get('location'));
