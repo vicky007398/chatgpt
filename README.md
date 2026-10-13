@@ -22,11 +22,13 @@ Railway publishes the website. Publishing a Codex environment does not deploy th
 
 In Google Cloud Console, create a project, configure the OAuth consent screen (Google Auth Platform), and create an OAuth client with application type **Web application**. Request only openid, email and profile.
 
-Add your Railway origin as an authorised JavaScript origin and this exact authorised redirect URI:
+Add `https://kosrent.vedtechnologies.co.in` as an **authorised JavaScript origin** (no path or trailing slash), and this exact authorised redirect URI:
 
 ```
 https://kosrent.vedtechnologies.co.in/auth/google/callback
 ```
+
+The primary app button uses Google Identity Services, with a FedCM account chooser on supported Chrome versions. The app posts the credential directly to its own server, which verifies Google’s signature, audience and a five-minute session nonce before rotating the session. This avoids transferring a login between the installed app and a separate Chrome window. Browser OAuth remains available as a fallback. The JavaScript origin above is required for the primary button.
 
 Copy its client ID and client secret into Railway variables. While the OAuth app is in testing mode, add your Google email and other testers as test users. Configure its audience/publishing status before allowing the public to sign in. No Google password is entered into KosRent.
 
@@ -57,7 +59,7 @@ Buyers and sellers can report listings and conversations, and block conversation
 
 ## Checks
 
-`npm run build` builds the UI. `node --check server/index.js` checks server syntax. `node --test tests/integration.test.js` runs database-backed API checks against an isolated test database with a running server; see the test file for required environment variables. Never use production data for tests.
+`npm run build` builds the UI. `node --check server/index.js` checks server syntax. `node --test tests/integration.test.js tests/app-login.test.js tests/identity-login.test.js` runs database-backed API and sign-in checks against an isolated test database with a running server; see the test file for required environment variables. Never use production data for tests.
 
 ## Rental-only update
 KosRent accepts house rentals only, with 1/2/3 BHK, exact address, monthly rent and a non-negative deposit. Area is in sq ft. Approved rentals appear on Home; marking a home rented hides it from new searches. Legacy sale listings are retained but excluded from rental screens. Two entry points support finding a home or listing one for rent. No paid plans or payments are enabled.

@@ -211,3 +211,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior: auto!important; animation-duration: .01ms!important; transition-duration: .01ms!important; }
 }
+
+.google-sign-in { width:100%;display:grid;gap:12px;justify-items:center; }
+.google-sign-in>div { width:100%;min-height:44px; }
+.google-sign-in p { margin:0;text-align:center;font-size:13px; }
+.profile-actions .google-sign-in .browser-sign-in { min-height:36px;background:transparent;border:0;padding:4px 8px;color:var(--muted);font-size:13px; }
