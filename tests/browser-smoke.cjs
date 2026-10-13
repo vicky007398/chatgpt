@@ -39,9 +39,11 @@ let browser;
   // and installed-app session refresh without using real Google credentials.
   const loginContext=await browser.newContext({viewport:{width:390,height:844}});
   await loginContext.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
-  await loginContext.route('**/auth/google?popup=1',async route=>{
-   await loginContext.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[buyer],secret)),domain:new URL(url).hostname,path:'/'}]);
-   await route.fulfill({status:302,headers:{location:url+'/auth/complete'},body:''});
+  await loginContext.route('https://accounts.google.com/**',async route=>{
+   const state=new URL(route.request().url()).searchParams.get('state');
+   const result=await db.query("UPDATE app_login_attempts SET status='complete',profile=$2 WHERE state=$1 AND status='pending' RETURNING state",[state,{sub:buyer,email:buyer+'@example.com',name:'Sample renter'}]);
+   assert.equal(result.rowCount,1,'real app session started an OAuth attempt');
+   await route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><script>window.close()</script>'});
   });
   const appWindow=await loginContext.newPage();
   await appWindow.goto(url);
@@ -58,7 +60,11 @@ let browser;
   console.log('Google return simulation passed: completion closes popup and app restores signed-in session.');
   const seller=await context(owner),renter=await context(buyer);
   const page=await seller.newPage(),recipient=await renter.newPage();
-  await page.goto(url);await page.getByRole('button',{name:'Chats',exact:true}).click();
+  await page.goto(url);
+  await page.getByRole('button',{name:'Profile',exact:true}).first().click();
+  await page.getByRole('heading',{name:'Sample owner',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByRole('button',{name:'Chats',exact:true}).click();
   // Reproduce installed-browser read requests that report an opaque origin.
   await page.route('**/api/conversations/*/read',async route=>{
    const headers=await route.request().allHeaders();assert.equal(headers['x-kosrent-visible'],'1');
@@ -73,7 +79,11 @@ let browser;
   await page.getByRole('button',{name:'Block user',exact:true}).click();
   await page.getByRole('button',{name:'Unblock user',exact:true}).waitFor();
   assert.equal(await page.getByRole('textbox',{name:'Message',exact:true}).isDisabled(),true);
-  await recipient.goto(url);await recipient.getByRole('button',{name:'Chats',exact:true}).click();
+  await recipient.goto(url);
+  await recipient.getByRole('button',{name:'Profile',exact:true}).first().click();
+  await recipient.getByRole('heading',{name:'Sample renter',exact:true}).waitFor();
+  await recipient.getByRole('button',{name:'Close',exact:true}).click();
+  await recipient.getByRole('button',{name:'Chats',exact:true}).click();
   await recipient.locator('.chat-list-row').filter({hasText:'Sample Kosamba rental'}).click();
   await recipient.getByRole('button',{name:'User blocked',exact:true}).waitFor();
   assert.equal(await recipient.getByRole('textbox',{name:'Message',exact:true}).isDisabled(),true);
