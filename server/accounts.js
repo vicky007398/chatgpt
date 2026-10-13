@@ -1,3 +1,5 @@
+import {DEVELOPER_EMAIL} from '../shared/contact.js';
+
 // All account removal runs in one transaction so foreign-key dependencies cannot
 // leave a partially deleted account. Only the authenticated user's ID is used.
 export function registerAccounts(app,{pool,asyncRoute}) {
@@ -45,6 +47,7 @@ export function registerAccounts(app,{pool,asyncRoute}) {
 <p>You can delete your account here, including without the Android app installed. Sign in with the Google account you use for KosRent.</p>
 <p>This permanently removes your account, listings, uploaded photos, saved homes, reports, payment-reference records, and conversations involving you, including messages sent by either participant. Other users' accounts and unrelated listings are kept. It does not delete your Google account.</p>
 <p>Copies already saved by others cannot be recalled. Hosting backups may retain copies until they are rotated; they are not removed by this action. Contact the operator using the contact on our <a href="/legal/privacy">Privacy Notice</a> for backup, access or other data requests.</p>
+<p>Developer contact: <a href="mailto:${DEVELOPER_EMAIL}">${DEVELOPER_EMAIL}</a></p>
 <p id="status" role="status">Checking your sign-in…</p><a id="signin" href="/auth/google?returnTo=delete-account" hidden>Continue with Google, then return to this page</a>
 <form id="deletion" hidden><label><input id="confirm" type="checkbox" required> I understand this permanently deletes my KosRent account and data.</label><button type="submit">Delete my account permanently</button></form>
 <a href="/">Keep my account and return home</a></main></body></html>`));

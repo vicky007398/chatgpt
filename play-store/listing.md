@@ -26,4 +26,4 @@ KosRent serves Kosamba only. Sign-in, listings and chat require an internet conn
 
 **Account deletion:** https://kosrent.vedtechnologies.co.in/delete-account
 
-**Support email:** Owner must supply a monitored public email. Do not submit a made-up address.
+**Support email:** rathodar110@gmail.com

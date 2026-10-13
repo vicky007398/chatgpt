@@ -113,6 +113,8 @@ Read cursors are stored per user/conversation in PostgreSQL, indexed by message 
 
 An Android Trusted Web Activity project is in `android/`, with store listing and release instructions in `play-store/`. Account deletion is available in Profile and at `/delete-account` without installing the app. It deletes the active account and associated records and revokes all its sessions. Chat users can report or block a participant; a block prevents new conversations across listings by that user. Hosting backup rotation and handling retained copies remain the operator’s responsibility.
 
+The public developer contact is `rathodar110@gmail.com`, shown in Profile, listing forms, legal pages and account deletion. Legal pages and `/api/billing/config` use it as the support email when `SUPPORT_EMAIL` is unset; an explicit support address still takes precedence. This does not configure the operator's legal name or business address, change administrator access, or enable payments.
+
 Set real `OPERATOR_NAME`, `SUPPORT_EMAIL` and `BUSINESS_ADDRESS` hosting variables. After Play App Signing enrollment, set `ANDROID_SHA256_FINGERPRINTS` to the Play app signing certificate (comma-separated if several certificates are needed). The server then serves `/.well-known/assetlinks.json` for `in.co.vedtechnologies.kosrent`. Without a certificate it returns 404; no fabricated certificate is shipped. Building the Android package does not publish it or verify live OAuth/device behaviour.
 
 Run the isolated API tests with `node --test tests/integration.test.js tests/accounts.test.js` and their documented `TEST_*` variables; run `node --test tests/android.test.js` for certificate validation.
