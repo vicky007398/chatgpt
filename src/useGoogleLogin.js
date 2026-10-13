@@ -7,9 +7,16 @@ export default function useGoogleLogin(refreshSession,api,onError) {
   useEffect(()=>{
     try {pending.current=JSON.parse(sessionStorage.getItem(storageKey)||'null');} catch {}
     let busy=false,alive=true;
+    const accept=value=>{
+      if(value&&pending.current&&value.state===pending.current.state&&typeof value.receipt==='string'){
+        pending.current.receipt=value.receipt;
+        sessionStorage.setItem(storageKey,JSON.stringify(pending.current));
+      }
+    };
     const clear=()=>{pending.current=null;sessionStorage.removeItem(storageKey);};
     const check=async()=>{
       if(!pending.current||busy||document.hidden)return;
+      try {accept(JSON.parse(localStorage.getItem('kosrent-sign-in')||'null'));} catch {}
       busy=true;
       const attempt=pending.current;
       try {
@@ -18,8 +25,8 @@ export default function useGoogleLogin(refreshSession,api,onError) {
       } catch(e){if(alive&&pending.current===attempt){clear();handlers.current.onError(e);}} finally {busy=false;}
     };
     const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('kosrent-sign-in'):null;
-    if(channel)channel.onmessage=check;
-    const storage=e=>{if(e.key==='kosrent-sign-in')check();};
+    if(channel)channel.onmessage=e=>{accept(e.data);check();};
+    const storage=e=>{if(e.key==='kosrent-sign-in'){try {accept(JSON.parse(e.newValue));} catch {}check();}};
     window.addEventListener('storage',storage);
     window.addEventListener('focus',check);
     document.addEventListener('visibilitychange',check);

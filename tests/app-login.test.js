@@ -26,7 +26,7 @@ test('installed-app OAuth tolerates a separate browser cookie jar while binding 
     async verifyIdToken({idToken}){return {getPayload:()=>({sub:id,email:id+'@example.com',name:'OAuth fixture',email_verified:true,nonce:issued.get(idToken).nonce})};}
   };
   try {
-    const complete=await registerAppLogin(app,{pool:db,oauth,asyncRoute:fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next),adminEmails:()=>new Set(),returnPage:(res,success)=>res.json({success})});
+    const complete=await registerAppLogin(app,{pool:db,oauth,asyncRoute:fn=>(req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next),adminEmails:()=>new Set(),returnPage:(res,success,proof)=>res.json({success,...proof})});
     app.get('/callback',async(req,res,next)=>{try{if(!await complete(req,res))res.sendStatus(400);}catch(e){next(e);}});
     app.get('/me',(req,res)=>res.json({user:req.session.user||null}));
     server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
@@ -38,7 +38,11 @@ test('installed-app OAuth tolerates a separate browser cookie jar while binding 
     assert.equal((await post('/api/auth/finish',cookie,attempt)).status,200);
     // Callback intentionally sends no cookie from the installed app.
     const callback=await fetch(base+'/callback?'+new URLSearchParams({state:attempt.state,code:attempt.state}));
-    assert.deepEqual(await callback.json(),{success:true});
+    const completed=await callback.json();assert.equal(completed.success,true);
+    assert.ok(completed.receipt);
+    assert.deepEqual(await (await post('/api/auth/finish',cookie,attempt)).json(),{pending:true},'initiator cannot claim a remotely completed login without the callback browser receipt');
+    assert.equal((await post('/api/auth/finish',cookie,{...attempt,receipt:'wrong'})).status,403);
+    attempt.receipt=completed.receipt;
     assert.equal((await post('/api/auth/finish',null,attempt)).status,410,'different session cannot claim');
     assert.equal((await post('/api/auth/finish',cookie,{state:attempt.state,claim:'wrong'})).status,410,'claim secret required');
     const finish=await post('/api/auth/finish',cookie,attempt);assert.deepEqual(await finish.json(),{pending:false});

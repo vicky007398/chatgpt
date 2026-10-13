@@ -6,12 +6,14 @@ const save=req=>new Promise((resolve,reject)=>req.session.save(e=>e?reject(e):re
 const regenerate=req=>new Promise((resolve,reject)=>req.session.regenerate(e=>e?reject(e):resolve()));
 
 // Bind login to the initiating app session. The Google browser window may use
-// a different cookie jar, but cannot claim a login on behalf of another app.
+// a different cookie jar. A separate receipt delivered only to the callback
+// browser prevents a shared Google URL from authenticating a remote initiator.
 export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adminEmails}) {
   await pool.query(`CREATE TABLE IF NOT EXISTS app_login_attempts(
     state TEXT PRIMARY KEY,session_id TEXT NOT NULL,claim_hash TEXT NOT NULL,
     verifier TEXT NOT NULL,nonce TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',
     profile JSONB,expires TIMESTAMPTZ NOT NULL DEFAULT NOW()+INTERVAL '10 minutes');
+    ALTER TABLE app_login_attempts ADD COLUMN IF NOT EXISTS receipt_hash TEXT;
     CREATE INDEX IF NOT EXISTS app_login_attempts_expiry ON app_login_attempts(expires)`);
   const cleanup=setInterval(()=>pool.query('DELETE FROM app_login_attempts WHERE expires<NOW()').catch(()=>{}),60000);
   cleanup.unref();
@@ -25,13 +27,17 @@ export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adm
     res.set('Cache-Control','no-store').json({state,claim,url});
   }));
   app.post('/api/auth/finish',asyncRoute(async(req,res)=>{
-    const {state,claim}=req.body||{};
+    const {state,claim,receipt}=req.body||{};
     if(typeof state!=='string'||typeof claim!=='string'||state.length>100||claim.length>100)return res.status(400).json({error:'Invalid sign-in attempt'});
     const {rows}=await pool.query('SELECT status FROM app_login_attempts WHERE state=$1 AND session_id=$2 AND claim_hash=$3 AND expires>NOW()',[state,req.sessionID,hash(claim)]);
     if(!rows[0])return res.status(410).json({error:'Sign-in expired. Please try again.'});
     if(rows[0].status==='failed')return res.status(400).json({error:'Google sign-in was interrupted. Please try again.'});
     if(rows[0].status!=='complete')return res.json({pending:true});
-    const claimed=await pool.query("DELETE FROM app_login_attempts WHERE state=$1 AND session_id=$2 AND claim_hash=$3 AND status='complete' AND expires>NOW() RETURNING profile",[state,req.sessionID,hash(claim)]);
+    if(receipt==null)return res.json({pending:true});
+    if(typeof receipt!=='string'||receipt.length>100)return res.status(400).json({error:'Invalid sign-in receipt'});
+    const proof=await pool.query('SELECT state FROM app_login_attempts WHERE state=$1 AND receipt_hash=$2',[state,hash(receipt)]);
+    if(!proof.rowCount)return res.status(403).json({error:'Invalid sign-in receipt'});
+    const claimed=await pool.query("DELETE FROM app_login_attempts WHERE state=$1 AND session_id=$2 AND claim_hash=$3 AND status='complete' AND expires>NOW() AND receipt_hash=$4 RETURNING profile",[state,req.sessionID,hash(claim),hash(receipt)]);
     if(!claimed.rows[0])return res.status(410).json({error:'Sign-in already completed. Please try again.'});
     const p=claimed.rows[0].profile;
     await pool.query('INSERT INTO users(id,email,name) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET email=$2,name=$3',[p.sub,p.email,p.name]);
@@ -54,8 +60,9 @@ export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adm
       const ticket=await oauth.verifyIdToken({idToken:tokens.id_token,audience:process.env.GOOGLE_CLIENT_ID});
       const p=ticket.getPayload();
       if(p.email_verified!==true||p.nonce!==attempt.nonce||typeof p.sub!=='string'||typeof p.email!=='string')throw Error('Invalid verified Google identity');
-      await pool.query("UPDATE app_login_attempts SET status='complete',profile=$2,verifier='',nonce='' WHERE state=$1",[attempt.state,{sub:p.sub,email:p.email,name:p.name||p.email}]);
-      returnPage(res,true);
+      const receipt=token();
+      await pool.query("UPDATE app_login_attempts SET status='complete',profile=$2,verifier='',nonce='',receipt_hash=$3 WHERE state=$1",[attempt.state,{sub:p.sub,email:p.email,name:p.name||p.email},hash(receipt)]);
+      returnPage(res,true,{state:attempt.state,receipt});
     } catch {
       await pool.query("UPDATE app_login_attempts SET status='failed',verifier='',nonce='' WHERE state=$1",[attempt.state]);
       returnPage(res,false);

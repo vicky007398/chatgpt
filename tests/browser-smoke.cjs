@@ -3,7 +3,7 @@
 const {chromium}=require('playwright');
 const pg=require('pg');
 const signature=require('cookie-signature');
-const {randomUUID}=require('node:crypto');
+const {randomUUID,randomBytes,createHash}=require('node:crypto');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const url=process.env.TEST_APP_URL,secret=process.env.TEST_SESSION_SECRET;
@@ -41,9 +41,14 @@ let browser;
   await loginContext.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
   await loginContext.route('https://accounts.google.com/**',async route=>{
    const state=new URL(route.request().url()).searchParams.get('state');
-   const result=await db.query("UPDATE app_login_attempts SET status='complete',profile=$2 WHERE state=$1 AND status='pending' RETURNING state",[state,{sub:buyer,email:buyer+'@example.com',name:'Sample renter'}]);
+   await route.fulfill({status:200,contentType:'text/html',body:`<!doctype html><script>location.replace(${JSON.stringify(url+'/auth/google/callback?state='+state+'&code=fixture')})</script>`});
+  });
+  await loginContext.route('**/auth/google/callback?**',async route=>{
+   const state=new URL(route.request().url()).searchParams.get('state');
+   const receipt=randomBytes(32).toString('base64url');
+   const result=await db.query("UPDATE app_login_attempts SET status='complete',profile=$2,receipt_hash=$3 WHERE state=$1 AND status='pending' RETURNING state",[state,{sub:buyer,email:buyer+'@example.com',name:'Sample renter'},createHash('sha256').update(receipt).digest('hex')]);
    assert.equal(result.rowCount,1,'real app session started an OAuth attempt');
-   await route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><script>window.close()</script>'});
+   await route.fulfill({status:200,contentType:'text/html',body:`<!doctype html><span id="app-login-receipt" data-state="${state}" data-receipt="${receipt}"></span><script src="/auth-return.js"></script>`});
   });
   const appWindow=await loginContext.newPage();
   await appWindow.goto(url);
