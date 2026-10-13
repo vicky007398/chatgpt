@@ -1,4 +1,7 @@
 export const ANDROID_PACKAGE='in.co.vedtechnologies.kosrent';
+// Verified SHA-256 of the certificate signing the directly distributed APK.
+// Play App Signing uses its own certificate, configured separately below.
+export const DIRECT_APK_SHA256='2E:CE:9C:49:E4:19:7F:6D:15:F0:E8:66:69:DD:7A:22:23:F9:F6:9E:85:9B:8B:DE:2F:89:F0:25:EE:6D:8E:54';
 
 export function androidAssetLinks(value) {
   const fingerprints=(value||'').split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
@@ -7,9 +10,9 @@ export function androidAssetLinks(value) {
 }
 
 export function registerAndroid(app) {
-  const links=androidAssetLinks(process.env.ANDROID_SHA256_FINGERPRINTS);
-  // Google's Play App Signing certificate is available only after Play enrollment.
-  // Do not claim domain verification with a made-up or upload-only certificate.
+  const links=androidAssetLinks([DIRECT_APK_SHA256,process.env.ANDROID_SHA256_FINGERPRINTS].filter(Boolean).join(','));
+  // This verifies direct APK installs. Add the actual Play app-signing certificate
+  // after enrollment before claiming verification for Play-installed builds.
   app.get('/.well-known/assetlinks.json',(req,res)=>{
     res.set('Cache-Control','public, max-age=300');
     res.status(links.length?200:404).json(links);

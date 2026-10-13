@@ -1,24 +1,49 @@
-# Release status and owner steps
+# KosRent Play Store release handoff
 
-The Android project and release listing are prepared. The owner has created a personal Google Play Console developer account. Completion of account verification, Play App Signing enrollment and production publication are not confirmed from this workspace.
+The owner reports that developer-account setup is complete, and that **KosRent has not yet been created as an app in Play Console**. The operator is **Ved Technologies**, with public developer/support email **rathodar110@gmail.com**. The owner requested **no address be published on the website**. Do not repeat account-signup questions or invent an address; Google may separately require verified legal/address details and public developer fields inside Play Console.
 
-1. Open the existing account at https://play.google.com/console and finish any remaining identity, contact-phone or device verification tasks shown on its Home page. The assistant cannot perform personal identity verification on the owner's behalf.
-2. Configure the owner's real public legal/operator name and business correspondence address in the website's `OPERATOR_NAME` and `BUSINESS_ADDRESS` settings; the owner must supply these details. The public developer/support email is `rathodar110@gmail.com`, also used as the default when `SUPPORT_EMAIL` is unset. An explicit `SUPPORT_EMAIL` overrides the support address. Unset identity/address fields are omitted from public policies rather than filled with invented information. Review the privacy notice and operating commitments before submitting.
-3. Deploy the changes from GitHub and verify the live health endpoint, Google login, photo upload, listings, call links, chat reporting/blocking and account deletion. Google OAuth's authorised JavaScript origin is `https://kosrent.vedtechnologies.co.in`, and its redirect URI is `https://kosrent.vedtechnologies.co.in/auth/google/callback`.
-4. Create a free app named KosRent in Play Console and upload the signed release `.aab` using Play App Signing. Keep the locally generated upload-key backup and password privately. Do not upload an unsigned bundle or debug APK.
-5. Set the Play **app signing** SHA-256 certificate in `ANDROID_SHA256_FINGERPRINTS` on the website, redeploy and verify `https://kosrent.vedtechnologies.co.in/.well-known/assetlinks.json`. The upload certificate alone does not verify a Play-installed app.
-6. Complete the current forms shown by Play Console: app access instructions, truthful content rating/audience, advertising declaration, Data safety and other applicable declarations. The app contains user-created property listings and private conversations. Review `data-safety.md` with the actual hosting/runtime configuration. Do not invent a reviewer account or bypass Google authentication. Provide working reviewer access and accurate instructions.
-7. Use `android/store_icon.png` (512×512) and `play-store/feature-graphic.png` (1024×500), and supply actual Android screenshots following the Console's current requirements. Capture screenshots from the deployed release on a real device, with permission for any visible personal information.
-8. Test the signed app on Android, including Google sign-in and returning to the app, keyboard/back navigation, file selection, offline behaviour, reporting/blocking and deletion. Complete the testing track and duration the Console requires for this account. Submit for production review only after these checks pass.
+## Prepared material
 
-Local automated checks use isolated PostgreSQL and synthetic signed sessions. They cannot verify real Google OAuth or actual Android behaviour. The user has reported successful sign-in on the Chrome-installed website; the signed Android package still needs real-device checks. The live operator name and business address were unset during inspection and require owner input. The public developer/support email has been supplied. Current Play account verification, signing enrollment and publication must be checked in the owner's Console; no claim of Google review approval is made.
+| Item | Where to use it |
+| --- | --- |
+| App name, descriptions, category, contact links and release notes | [listing.md](listing.md) → Grow users → Store presence → Main store listing (or the Console's current equivalent) |
+| Reviewable data-type and deletion entries | [data-safety.md](data-safety.md) → App content → Data safety |
+| Actual login/navigation and reviewer access instructions | [app-access.md](app-access.md) → App content → App access |
+| Audience, ads, financial features, content rating and testing guidance | [declarations.md](declarations.md) → the corresponding App content forms |
+| Store icon | `android/store_icon.png` — 512×512 |
+| Feature graphic | `play-store/feature-graphic.png` — 1024×500 |
+| Android source and release-signing instructions | [../android/README.md](../android/README.md) |
+| Privacy policy | https://kosrent.vedtechnologies.co.in/legal/privacy |
+| Terms | https://kosrent.vedtechnologies.co.in/legal/terms |
+| Account deletion | https://kosrent.vedtechnologies.co.in/delete-account |
 
-Google's current Console requirements take precedence over this checklist. Helpful official references:
+The candidate is a free Kosamba rental app with Google sign-in, owner listings/photos, saved homes, private messaging, report/block tools, account deletion and an admin-only usage dashboard. It does not collect rent, deposits or listing fees. Do not enable manual UPI fees as part of the first Play release.
 
-- https://support.google.com/googleplay/android-developer/answer/13327111 (account deletion)
-- https://support.google.com/googleplay/android-developer/answer/10787469 (Data safety)
-- https://support.google.com/googleplay/android-developer/answer/14151465 (testing requirements)
-- https://support.google.com/googleplay/android-developer/answer/11926878 (target API requirements; API 36 required for new apps from August 31, 2026)
-- https://github.com/GoogleChromeLabs/bubblewrap
+## Final steps in the existing Console
 
-Keep the first release free. Digital listing charges may have additional Play billing requirements and are not enabled by this preparation.
+1. **Create KosRent in Play Console.** Click Create app; enter KosRent, choose English, App and Free, and accept the applicable declarations truthfully. Choose House & Home and initial distribution in India in the relevant setup fields. Paste the prepared listing/contact/policy entries and upload the actual candidate graphics/screenshots.
+2. **Enrol in Play App Signing and upload the verified signed release AAB to the appropriate testing track.** The signed candidate is version **1.0.1**, version code **2**. Use `/workspace/releases/1.0.1/kosrent-1.0.1.aab` and its release report/checksums to identify the verified file; a debug APK or unsigned bundle cannot substitute. Release outputs and private upload-key material are stored outside Git. Keep the upload key/password backed up securely and do not share them in chat or source.
+3. **Finish website association for Play-delivered builds.** Copy **App integrity → App signing key certificate → SHA-256 certificate fingerprint** from the Console. Set the website's `ANDROID_SHA256_FINGERPRINTS` to that fingerprint and redeploy. Check https://kosrent.vedtechnologies.co.in/.well-known/assetlinks.json returns the correct package and actual Play certificate. The certificate used for a locally installed APK is not proof that a Play-installed build is verified.
+4. **Submit truthful App content forms.** The documents contain specific proposed entries. The actual IARC rating comes from the questionnaire. Review production log/back-up practices and third-party arrangements before finalising Data safety. Validate unrestricted reviewer access to the restricted features; no reviewer credential has been fabricated.
+5. **Complete real Android/test-track checks.** Sign in with Google, return to the app, upload a photo, publish/edit/mark-rented/remove a test listing, chat between two accounts, report/block, exercise keyboard/back navigation and the offline fallback, and delete a disposable test account. Confirm a Play-installed build has the intended toolbar-free verified app view on the KosRent domain; Google authentication itself uses a secure browser screen.
+6. **Complete the testing requirement shown by the account and submit for production review.** Newer personal accounts commonly require at least 12 opted-in testers continuously for 14 days and a production-access application. Follow this account's actual Console requirement. Real testing and Google's review cannot be completed by generating a bundle locally.
+
+Local automated tests use isolated PostgreSQL and synthetic sessions. They do not establish real Google OAuth, Android-device behaviour, tester participation or Google approval. The owner has reported successful Chrome-installed-app login, which is a different installation channel from the Play release.
+
+## Items that cannot be marked complete from this workspace
+
+- Creating the KosRent app, uploading/enrolling its release and obtaining the resulting **Play app-signing** certificate. The owner confirmed the app has not yet been created in Console.
+- Actual production log/back-up retention and review of provider data-processing arrangements.
+- Reliable reviewer login resources, real Android installation and any required closed-test participation/results.
+- Production-access application, submission and Google's review decision.
+
+These are specific Console/provider/device actions, not additional signup fees or a demand to republish the owner's address. The repository's prepared documents and Android build do not claim they have already happened.
+
+Google's current Console requirements take precedence over the handoff:
+
+- Data safety: https://support.google.com/googleplay/android-developer/answer/10787469
+- Account deletion: https://support.google.com/googleplay/android-developer/answer/13327111
+- Reviewer access: https://support.google.com/googleplay/android-developer/answer/9859455
+- Personal-account testing: https://support.google.com/googleplay/android-developer/answer/14151465
+- Target API: https://support.google.com/googleplay/android-developer/answer/11926878
+- Android wrapper tooling: https://github.com/GoogleChromeLabs/bubblewrap

@@ -53,10 +53,9 @@ Buyers and sellers can report listings and conversations, and block conversation
 
 ## Known remaining launch work
 
-- Village/town entry is free text, not an authoritative district → taluka → village directory. Connect an official current Gujarat directory before claiming that selection is implemented.
-- District names, unit names and a few administrative/error labels remain English; seller-written content is not automatically translated.
-- Add privacy/terms documents, deletion/export policies, operational monitoring and a fuller moderation workflow before broad public launch.
-- End-to-end Google sign-in must be tested with your real OAuth credentials and Railway domain; those are not supplied with this code.
+- The release currently serves Kosamba only and uses English. Other-city selection and translated user content are not implemented.
+- Privacy/terms, account deletion and report/block tools are implemented. The operator still needs to monitor reports and support, and establish production backup/log retention.
+- Test the signed Android release on real devices and through its Play test track, including Google sign-in and return to the app. Local synthetic-session tests do not establish that device behaviour.
 
 ## Checks
 
@@ -73,19 +72,21 @@ KosRent now serves rentals in Kosamba, Surat only. The home screen has two large
 
 PWA files are in `public/manifest.webmanifest`, `public/sw.js`, `public/offline.html`, and `public/icons/`. Deploy over HTTPS. On Android Chrome, use the download icon when an installation prompt is available, or the browser's Install app / Add to Home screen menu. On iPhone, use Safari → Share → Add to Home Screen. Installation UI depends on browser/device support. Test on real devices after Railway deployment. The offline screen is available, but current listings, accounts and messages require a connection. The worker does not cache API or OAuth traffic.
 
-For Google Play, package the deployed PWA as an Android Trusted Web Activity (for example using Bubblewrap) or use a suitable Android wrapper. A Play Console account, signed Android App Bundle, verified domain association (`.well-known/assetlinks.json` for a TWA), privacy policy, Data safety declarations and applicable store testing/review are separate release steps. No Android bundle or Play Store release has been created in this update.
+The Android Trusted Web Activity project and signed version 1.0.1/code 2 release are prepared. The owner reports Play developer-account setup is complete, but KosRent has not been created inside Console. App creation, signed AAB upload, Play certificate association and the account's testing/review requirements remain external steps; see [play-store/README.md](play-store/README.md).
 
 ## Rental form fields
 
 Owner names are trimmed, repeated spaces removed, and words capitalised when saved. Choose one of the seven configured Kosamba localities, enter the exact address, upload up to five photos (3 MB each), choose furnishing, BHK/area, rent and deposit, and provide a mobile number. Optional Google Maps URLs are displayed as non-clickable reference text, not a navigable link. A user can still copy text; this is not an access restriction on the location. Existing listings need locality/furnishing selected when next edited. Authenticated listing responses include phone numbers for tap-to-call.
 
-## Listing periods, manual UPI renewals and policies
+## Earlier renewal implementation — inactive during free launch
+
+The following describes retained renewal code and records. Payment collection and expiry are disabled in the current release; setting an environment flag alone does not enable them.
 
 A listing gets 30 days on first approval. Edits/reapproval do not reset its original expiry. Existing approved ads receive 30 days from this migration's first startup. Expired ads are excluded from public listings and new conversation creation without deleting owner data or old conversations. My listings displays the expiry and an in-app reminder during the last seven days; there are no email/push reminders yet.
 
 A manually verified renewal adds 30 days from the later of existing expiry and verification time. Price is ₹100 total per listing; there are no automatic debits. Payment requests require current policy acceptance and a 12-digit UPI reference. Only the owner can submit; only an admin can verify. References are unique. Transactional locking prevents the same request being verified twice. Admins must independently confirm actual ₹100 receipt in bank/UPI records. No gateway or banking verification is connected. A screenshot is not sufficient proof.
 
-Paid collection is disabled by default. In Railway, set `OPERATOR_NAME` (legal/business name), `SUPPORT_EMAIL` (monitored public email), `BUSINESS_ADDRESS` (business correspondence address), `UPI_ID`, and `UPI_PAYEE_NAME` (actual payee name). Read and review `/legal/terms`, `/legal/privacy` and `/legal/refunds`, including operational commitments to respond to complaints, verify payments, and process refunds. Enable `BILLING_ENABLED=true` only after the values and procedures are correct. Publish the same legal identity/payee users will see. Never enter UPI PINs or banking passwords. If any required field is missing, the server will refuse payment requests even when the flag is true.
+The current server refuses renewal payment requests regardless of `BILLING_ENABLED`. Introducing paid plans requires a separate implementation, policy/consent review and compliance with the applicable Play billing rules. Do not publish payment instructions or enable collection for this free release. The owner's business address is not published in the website or public billing configuration.
 
 Owners submit the UPI reference in Profile → My listings → Listing renewals. Review → Payment verification shows pending requests. Verify only after confirming receipt, or reject with a visible explanation. An expired home returns to public search only after a verified extension and provided the listing remains approved. Paid renewal never overrides moderation. Handle eligible refunds manually through the original payer's supported payment route and retain the relevant records; no refund API is implemented. Rent and security deposits are not processed by KosRent.
 
@@ -105,7 +106,7 @@ The manifest requests fullscreen, with standalone fallback for compatible browse
 
 ## Chat interface and in-app unread counts
 
-Mobile chat uses a conversation list and separate thread with a back button, incoming/outgoing bubbles, date separators and a bottom composer. Desktop uses two panes. Block/report controls have been removed from the chat UI; listing reports remain available. Existing server-side blocking preferences are preserved. Messages refresh every 1.5 seconds while a visible thread is open; conversation previews and unread badges refresh every 2 seconds while the app is visible. Sends display immediately after server confirmation. There are no operating-system push notifications or background delivery guarantees.
+Mobile chat uses a conversation list and separate thread with a back button, incoming/outgoing bubbles, date separators and a bottom composer. Desktop uses two panes. Conversation report/block controls and listing reports are available. Messages refresh every 1.5 seconds while a visible thread is open; conversation previews and unread badges refresh every 2 seconds while the app is visible. Sends display immediately after server confirmation. There are no operating-system push notifications or background delivery guarantees.
 
 Read cursors are stored per user/conversation in PostgreSQL, indexed by message sequence. Viewing a thread marks only the fetched message cursor read; other users' counts and newer messages are not cleared. Unread counts appear on each chat and the Chats navigation icon and survive reloads. Tests covered real local PostgreSQL with synthetic sessions; Google login and on-device deployment should still be checked after Railway redeployment.
 
@@ -113,9 +114,9 @@ Read cursors are stored per user/conversation in PostgreSQL, indexed by message 
 
 An Android Trusted Web Activity project is in `android/`, with store listing and release instructions in `play-store/`. Account deletion is available in Profile and at `/delete-account` without installing the app. It deletes the active account and associated records and revokes all its sessions. Chat users can report or block a participant; a block prevents new conversations across listings by that user. Hosting backup rotation and handling retained copies remain the operator’s responsibility.
 
-The public developer contact is `rathodar110@gmail.com`, shown in Profile, listing forms, legal pages and account deletion. Legal pages and `/api/billing/config` use it as the support email when `SUPPORT_EMAIL` is unset; an explicit support address still takes precedence. This does not configure the operator's legal name or business address, change administrator access, or enable payments.
+The operator defaults to the owner-supplied **Ved Technologies**, and the public developer contact is `rathodar110@gmail.com`, shown in Profile, listing forms, legal pages and account deletion. Legal pages and `/api/billing/config` use this email for support when `SUPPORT_EMAIL` is unset; an explicit support email still takes precedence. The business address is omitted from public pages and configuration, as requested. Administrator access and free operation remain controlled separately.
 
-Set real `OPERATOR_NAME`, `SUPPORT_EMAIL` and `BUSINESS_ADDRESS` hosting variables. After Play App Signing enrollment, set `ANDROID_SHA256_FINGERPRINTS` to the Play app signing certificate (comma-separated if several certificates are needed). The server then serves `/.well-known/assetlinks.json` for `in.co.vedtechnologies.kosrent`. Without a certificate it returns 404; no fabricated certificate is shipped. Building the Android package does not publish it or verify live OAuth/device behaviour.
+The server serves `/.well-known/assetlinks.json` for `in.co.vedtechnologies.kosrent` with the verified certificate signing the directly distributed APK. Its public certificate is [android/upload-certificate.pem](android/upload-certificate.pem). After Play App Signing enrollment, add the actual **Play app-signing certificate** to `ANDROID_SHA256_FINGERPRINTS` (comma-separated if several are needed) and redeploy. The direct APK/upload certificate does not establish association for a build signed by Google Play. Building the Android package does not publish it or verify live OAuth/device behaviour.
 
 Run the isolated API tests with `node --test tests/integration.test.js tests/accounts.test.js` and their documented `TEST_*` variables; run `node --test tests/android.test.js` for certificate validation.
 

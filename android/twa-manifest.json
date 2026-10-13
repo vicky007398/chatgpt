@@ -4,13 +4,13 @@
   "name": "KosRent",
   "launcherName": "KosRent",
   "display": "fullscreen",
-  "themeColor": "#123B32",
-  "themeColorDark": "#000000",
-  "navigationColor": "#000000",
-  "navigationColorDark": "#000000",
-  "navigationDividerColor": "#000000",
-  "navigationDividerColorDark": "#000000",
-  "backgroundColor": "#F6F8F3",
+  "themeColor": "#FFFFFF",
+  "themeColorDark": "#FFFFFF",
+  "navigationColor": "#FFFFFF",
+  "navigationColorDark": "#FFFFFF",
+  "navigationDividerColor": "#DDDDDD",
+  "navigationDividerColorDark": "#DDDDDD",
+  "backgroundColor": "#FFFFFF",
   "enableNotifications": false,
   "startUrl": "/",
   "iconUrl": "https://kosrent.vedtechnologies.co.in/icons/icon-512.png",
@@ -20,8 +20,8 @@
     "path": "upload-key.jks",
     "alias": "kosrent-upload"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap",
   "webManifestUrl": "https://kosrent.vedtechnologies.co.in/manifest.webmanifest",
@@ -46,5 +46,5 @@
     "fullscreen",
     "standalone"
   ],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }
