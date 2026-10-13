@@ -28,7 +28,8 @@ Add `https://kosrent.vedtechnologies.co.in` as an **authorised JavaScript origin
 https://kosrent.vedtechnologies.co.in/auth/google/callback
 ```
 
-The primary app button uses Google Identity Services, with a FedCM account chooser on supported Chrome versions. The app posts the credential directly to its own server, which verifies Google’s signature, audience and a five-minute session nonce before rotating the session. This avoids transferring a login between the installed app and a separate Chrome window. Browser OAuth remains available as a fallback. The JavaScript origin above is required for the primary button.
+The primary app button uses server-based Google OAuth with PKCE. It requires the redirect URI above and does not load Google's JavaScript sign-in SDK. Cookies and callbacks use the current public domain; older hosting links redirect to it. A successful return signs in the shared Chrome session before the Google window closes, and the installed app checks its session when it regains focus. Google controls the browser UI during authorization. Credential verification endpoints remain available for compatibility with previously loaded app pages.
+
 
 Copy its client ID and client secret into Railway variables. While the OAuth app is in testing mode, add your Google email and other testers as test users. Configure its audience/publishing status before allowing the public to sign in. No Google password is entered into KosRent.
 
@@ -46,7 +47,7 @@ Open http://localhost:3000. `npm run dev` is a frontend-only Vite server and is 
 
 ## Storage and security
 
-Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: five JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed with one-year rolling login sessions that last until logout or browser/app data clearing. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. The home feed is visible without login; full details, owner phone numbers, calls, chats and listing creation require Google sign-in. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
+Photos are stored as binary data in PostgreSQL, so they survive deploys without a filesystem volume. Limit: five JPEG/PNG/WebP photos, 3 MB each. This is suitable for an initial smaller deployment; monitor database storage and move photos to object storage as usage grows. Configure Railway backups for your database. Session storage is PostgreSQL-backed with a one-year cookie expiry; API reads do not renew the cookie, so an earlier response cannot overwrite a freshly signed-in session. Logout or browser/app data clearing ends the login earlier. HTTPS secure cookies, same-origin mutation checks, rate limits, server-side ownership and conversation-participant checks are enabled. The home feed is visible without login; full details, owner phone numbers, calls, chats and listing creation require Google sign-in. Google authenticates accounts; it does not verify identity or legal ownership. Review does not certify ownership.
 
 Buyers and sellers can report listings and conversations, and block conversations. Admins can remove reported listings. Contact-pattern filters reduce external contact sharing but cannot catch every disguised phone number or image. No attachments in chat.
 

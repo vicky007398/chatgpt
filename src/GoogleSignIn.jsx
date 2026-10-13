@@ -26,6 +26,9 @@ export default function GoogleSignIn({api,onSignedIn,browserSignIn}){
       for(const result of results)if(result.status==='rejected')throw result.reason;
       const [google,config]=results.map(result=>result.value);
       if(!alive)return;
+      if(config.origin&&window.location.origin!==config.origin){
+        const target=new URL(config.origin);target.pathname=window.location.pathname;target.search=window.location.search;window.location.replace(target.href);return;
+      }
       google.initialize({client_id:config.clientId,nonce:config.nonce,auto_select:false,
         use_fedcm_for_button:true,use_fedcm_for_prompt:true,ux_mode:'popup',
         callback:async result=>{

@@ -8,7 +8,7 @@ const regenerate=req=>new Promise((resolve,reject)=>req.session.regenerate(e=>e?
 // Bind login to the initiating app session. The Google browser window may use
 // a different cookie jar. A separate receipt delivered only to the callback
 // browser prevents a shared Google URL from authenticating a remote initiator.
-export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adminEmails}) {
+export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adminEmails,origin}) {
   await pool.query(`CREATE TABLE IF NOT EXISTS app_login_attempts(
     state TEXT PRIMARY KEY,session_id TEXT NOT NULL,claim_hash TEXT NOT NULL,
     verifier TEXT NOT NULL,nonce TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',
@@ -24,7 +24,7 @@ export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adm
     await pool.query('DELETE FROM app_login_attempts WHERE expires<NOW()');
     await pool.query('INSERT INTO app_login_attempts(state,session_id,claim_hash,verifier,nonce) VALUES($1,$2,$3,$4,$5)',[state,req.sessionID,hash(claim),verifier,nonce]);
     const url=oauth.generateAuthUrl({scope:['openid','email','profile'],state,nonce,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256'});
-    res.set('Cache-Control','no-store').json({state,claim,url});
+    res.set('Cache-Control','no-store').json({state,claim,url,...(origin?.startsWith('https:')?{origin}:{})});
   }));
   app.post('/api/auth/finish',asyncRoute(async(req,res)=>{
     const {state,claim,receipt}=req.body||{};

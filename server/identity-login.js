@@ -6,12 +6,12 @@ const regenerate=req=>new Promise((resolve,reject)=>req.session.regenerate(e=>e?
 // Google Identity Services returns the credential to the app that requested it.
 // Never authenticate from a browser message alone: verify Google's signature,
 // audience and the nonce belonging to this app session on the server.
-export function registerIdentityLogin(app,{pool,oauth,asyncRoute,adminEmails,clientId}) {
+export function registerIdentityLogin(app,{pool,oauth,asyncRoute,adminEmails,clientId,origin}) {
   app.post('/api/auth/identity/start',asyncRoute(async(req,res)=>{
     const nonce=randomBytes(32).toString('base64url');
     req.session.identityLogin={nonce,expires:Date.now()+5*60*1000};
     await save(req);
-    res.set('Cache-Control','no-store').json({clientId,nonce});
+    res.set('Cache-Control','no-store').json({clientId,nonce,...(origin?{origin}:{})});
   }));
   app.post('/api/auth/identity/finish',asyncRoute(async(req,res)=>{
     const attempt=req.session.identityLogin;

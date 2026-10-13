@@ -45,6 +45,9 @@ export default function useGoogleLogin(refreshSession,api,onError) {
     event.preventDefault();
     try {
       const attempt=await handlers.current.api('/auth/start',{method:'POST'});
+      if(attempt.origin&&window.location.origin!==attempt.origin){
+        popup.close();const target=new URL(attempt.origin);target.pathname=window.location.pathname;target.search=window.location.search;window.location.replace(target.href);return;
+      }
       pending.current={state:attempt.state,claim:attempt.claim};
       sessionStorage.setItem(storageKey,JSON.stringify(pending.current));
       popup.location.replace(attempt.url);
