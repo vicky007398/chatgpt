@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import Live from './Live.jsx';
 import AppUpdate from './AppUpdate.jsx';
 import './style.css';
+import './theme.css';
 function WelcomeSplash(){
  const [show,setShow]=React.useState(()=>!sessionStorage.getItem('kosrent-welcome-shown'));
  React.useEffect(()=>{if(!show)return;const timer=setTimeout(()=>{sessionStorage.setItem('kosrent-welcome-shown','1');setShow(false)},5000);return()=>clearTimeout(timer)},[show]);

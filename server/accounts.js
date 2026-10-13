@@ -40,7 +40,7 @@ export function registerAccounts(app,{pool,asyncRoute}) {
   }));
   app.get('/delete-account',(req,res)=>res.type('html').send(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=kosrent-1"/><title>Delete your account — KosRent</title>
-<link rel="stylesheet" href="/account-deletion.css"><script src="/account-deletion.js" defer></script></head>
+<link rel="stylesheet" href="/account-deletion.css"><link rel="stylesheet" href="/legal-theme.css"><script src="/account-deletion.js" defer></script></head>
 <body><main><a href="/">← KosRent</a><h1>Delete your KosRent account</h1>
 <p>You can delete your account here, including without the Android app installed. Sign in with the Google account you use for KosRent.</p>
 <p>This permanently removes your account, listings, uploaded photos, saved homes, reports, payment-reference records, and conversations involving you, including messages sent by either participant. Other users' accounts and unrelated listings are kept. It does not delete your Google account.</p>

@@ -1,0 +1,213 @@
+/* KosRent's dark, colourful theme. Controls keep a rectangular silhouette. */
+:root {
+  color-scheme: dark;
+  --surface: #101116;
+  --card: #1b1c24;
+  --raised: #252631;
+  --line: #484955;
+  --text: #f4f3fa;
+  --muted: #b6b3c6;
+  --lime: #dcfa72;
+  --violet: #ba9cff;
+  --aqua: #8ee9dc;
+  --radius-field: 12px;
+  --radius-card: 20px;
+  color: var(--text);
+  background: var(--surface);
+}
+body {
+  color: var(--text);
+  background: radial-gradient(ellipse at 5% 0%, #34265070, transparent 38%), var(--surface);
+}
+h1,h2,h3 { color: var(--text); font-weight: 700; }
+h2 { letter-spacing: -1px; }
+button,input,select,textarea { color: var(--text); }
+:where(input:not([type="checkbox"]):not([type="hidden"]),select,textarea) {
+  border-radius: var(--radius-field);
+  background-color: var(--raised);
+  color: var(--text);
+  border-color: #676574;
+  accent-color: var(--lime);
+}
+input::placeholder,textarea::placeholder { color: #aaa7ba; opacity: 1; }
+input[type="checkbox"] { accent-color: var(--lime); border-radius: 4px; }
+input[type="file"] { padding: 10px; }
+input::file-selector-button {
+  background: #3b304e; color: #eee4ff; border: 1px solid #74608e;
+  border-radius: 8px; padding: 9px 12px; margin-right: 10px; font: inherit;
+}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline: 2px solid var(--violet); outline-offset: 3px;
+}
+.app-header {
+  background: #101116ee; border-bottom: 1px solid #34343f;
+  box-shadow: 0 8px 28px #0002; backdrop-filter: blur(18px);
+}
+.brand { color: var(--text); font-weight: 700; }
+.brand-dot { color: var(--lime); }
+.brand-icon { background: var(--lime); color: #172017; border-radius: 10px; }
+.town-label,.town-label small { color: var(--muted); }
+.app-header .app-icon {
+  background: #25222f; border: 1px solid #43404d;
+  color: var(--violet); border-radius: 12px;
+}
+.app-header .app-icon:nth-child(2) { color: var(--lime); }
+.app-header .app-icon:nth-child(3) { color: var(--aqua); }
+.app-header .app-icon:last-child { color: #ffb5ca; }
+.bottom-nav {
+  background: #1a1b23f5; border-color: #484653; border-radius: 20px;
+  box-shadow: 0 -8px 35px #0003; backdrop-filter: blur(18px);
+}
+.bottom-nav button { color: #b0adbf; }
+.bottom-nav button>span { border-radius: 10px; }
+.bottom-nav .active,.bottom-nav .active>span { color: var(--lime); }
+.bottom-nav .active>span { background: #3b4327; }
+.bottom-nav small { font-weight: 600; }
+.nav-unread,.unread-badge { background: var(--violet); color: #171020; border-color: var(--card); }
+.rental-modes { gap: 14px; }
+.rental-modes button {
+  background: linear-gradient(140deg,#2e263e,#211e2b); color: #f1e9ff;
+  border: 1px solid #685580; border-radius: 18px;
+  box-shadow: inset 0 1px 0 #ffffff0a, 0 10px 28px #0002;
+  font-weight: 700; letter-spacing: -.5px;
+}
+.rental-modes button svg { color: var(--violet); }
+.rental-modes .selected {
+  background: linear-gradient(140deg,#e1fc8c,#c3e953); color: #202514;
+  border-color: #e1fc8c; box-shadow: 0 8px 28px #c3e95316;
+}
+.rental-modes .selected svg { color: #38431e; }
+.section-top p,.toolbar>span { color: var(--muted); }
+.toolbar { border-color: #3e3d48; }
+.bhk-filters button,.chips button {
+  color: #d8d4e3; background: var(--card); border-color: #55505f;
+  border-radius: 10px; min-height: 44px;
+}
+.bhk-filters .selected,.chips .selected { background: #baa0f7; color: #20192e; border-color: #baa0f7; }
+.text-search,.chat-search {
+  border: 1px solid #55515f; border-radius: var(--radius-field);
+  background: #20212a; color: var(--muted);
+}
+.text-search input,.chat-search input { border: 0; background: transparent; border-radius: 0; }
+.property {
+  background: linear-gradient(150deg,#25242e,#191a22); border: 1px solid #514957;
+  border-radius: var(--radius-card); box-shadow: 0 14px 32px #0003;
+}
+.property:hover { border-color: #8b759e; box-shadow: 0 16px 36px #0005; }
+.property-title { color: var(--text); font-size: 19px; }
+.property .price { color: var(--text); font-size: 28px; letter-spacing: -1px; }
+.property .price>span,.property .per-month { color: var(--muted); }
+.location,.property .location,.rent-deposit,.property .location svg { color: var(--muted); }
+.property .rent-deposit svg { color: var(--violet); }
+.property-body { padding: 20px; }
+.property-bottom { border-color: #45404d; color: #d3cddd; }
+.property-bottom button { background: #3a314b; color: #d6bfff; border-radius: 10px; }
+.property .tag { background: var(--lime); color: #242c18; border-color: #e0fa8a; border-radius: 7px; }
+.image-type { background: #1b172cdb; color: #e9dbff; border-radius: 8px; }
+.heart { background: #1b1c26ed; color: #f4d8e1; border: 1px solid #ffffff30; }
+.heart.is-saved { color: #ff92b1; }
+.no-property-photo,.photo-slider { background: linear-gradient(140deg,#3b2c56,#192c32); color: #d6bcff; }
+.no-property-photo span { color: #cdc2dc; }
+.photo-count,.photo-dots { background: #15131ad9; color: #efe8ff; }
+.call-link { background: #303b31; border: 1px solid #59715a; color: var(--aqua); border-radius: 12px; }
+.primary,.detail .modal-content>.full,.detail-call {
+  background: var(--lime); color: #202815; border-radius: var(--radius-field);
+  font-weight: 700; box-shadow: 0 5px 20px #0002;
+}
+.primary:hover,.detail-call:hover { background: #e8ffa1; }
+.primary:disabled { opacity: .55; }
+.detail .modal-content>.full { box-shadow: 0 -8px 24px #191a22; }
+.overlay { background: #06060dc9; backdrop-filter: blur(12px); }
+.modal { background: var(--card); border: 1px solid #55505e; border-radius: 22px; box-shadow: 0 30px 100px #0008; }
+.modal-content>p,.listing-form small,.period-note { color: var(--muted); }
+.modal-content h2 { font-weight: 700; }
+.close { background: #34303e; color: var(--text); border: 1px solid #625b6e; border-radius: 10px; }
+.listing-form label { color: #ddd9e8; font-size: 13px; font-weight: 600; }
+.listing-form input,.listing-form select,.listing-form textarea {
+  background: #282630; border-color: #706777; color: var(--text);
+  border-radius: 12px; padding: 13px 14px;
+}
+.listing-form textarea { border-radius: 12px; }
+.listing-form .checkbox input { padding: 0; width: 18px; height: 18px; flex-shrink: 0; }
+.policy-links { color: var(--aqua); }
+.profile-avatar { background: #342943; color: #d2b6ff; border-radius: 18px; }
+.profile-actions button,.profile-actions a {
+  background: #27242f; border-color: #595160; border-radius: 12px; color: #f0eaf7;
+}
+.profile-actions svg { color: var(--violet); }
+.profile-actions a[href="/delete-account"] { color: #ffbdc7; }
+.profile-actions a[href="/delete-account"] svg { color: #ff9eb0; }
+.setup-note,.demo-note,.map-reference,.share-options,.billing-panel,.payment-row {
+  background: #26232f; border-color: #5b5067; color: #d2cadf; border-radius: 14px;
+}
+.share-options>button { background: #363042; color: #eee6fa; border-color: #776588; border-radius: 12px; }
+.share-options input { background: #302b3b; color: #efe8fa; border-color: #776588; border-radius: 12px; }
+.manage-actions button { border-color: #6b5b76; background: #332b3e; color: #e7d8f7; border-radius: 10px; }
+.report { color: #e8b1c4; }
+.detail-stats { border-color: #504454; }
+.detail-stats span { color: var(--muted); }
+.empty,.empty p { color: var(--muted); }
+.empty h3 { color: var(--text); font-weight: 700; }
+.empty svg { color: var(--violet); }
+.error { color: #ffb2b9; }
+.live-notice { background: #352c42; color: #ead9ff; border: 1px solid #786288; border-radius: 12px; }
+.app-update { background: #382d4b; color: #f3eafd; border-color: #ab8dd0; border-radius: 16px; }
+.app-update small { color: #d9c8ed; }
+.app-update button { background: var(--lime); color: #202815; border-radius: 10px; }
+.chat-app { background: var(--card); border-color: #49424f; border-radius: 20px; }
+.chat-list { background: #191a22; border-color: #443c4c; }
+.chat-list-row { border-color: #35313e; color: var(--text); }
+.chat-list-row.selected { background: #322742; }
+.chat-list-row small,.chat-list-row p,.chat-row-meta time { color: var(--muted); }
+.chat-avatar { background: #372c45; color: #d4b9ff; border-radius: 12px; }
+.chat-welcome { background: radial-gradient(circle at 50% 30%,#36284b,#191a22 65%); color: var(--muted); }
+.chat-welcome>svg { color: var(--violet); }
+.chat-thread { background: #14151d; }
+.thread-header { background: #22212b; border-color: #403947; }
+.thread-header small { color: var(--muted); }
+.thread-header button { color: #d9bcff; }
+.thread-safety { background: #191a22; border-color: #3a3342; gap: 8px; }
+.thread-safety button { background: #302735; color: #e6c8dd; border-color: #68536c; border-radius: 10px; }
+.thread-safety button:disabled { opacity: .65; }
+.message-bubble { border-radius: 14px; box-shadow: 0 3px 10px #0003; }
+.message-bubble.outgoing { background: #cbe8a0; color: #243219; border-top-right-radius: 7px; }
+.message-bubble.incoming { background: #302b3d; color: #f4ecff; border: 1px solid #554567; border-top-left-radius: 7px; }
+.message-bubble.outgoing small { color: #495a35; }
+.message-bubble.incoming small { color: #c2aed7; }
+.chat-date { background: #2a2834; color: #c8c1d6; border-radius: 8px; }
+.chat-info { color: var(--muted); }
+.thread-compose { background: #191a22; border-top: 1px solid #3a3442; }
+.thread-compose textarea { background: #2a2734; border-color: #756782; border-radius: 12px; color: var(--text); }
+.thread-compose button { background: var(--lime); color: #243219; border-radius: 12px; }
+.chat-error { background: #452731; color: #ffc4ce; }
+.analytics-heading button { background: #32283f; color: #e0c9fd; border-color: #7a608e; border-radius: 12px; }
+.analytics-metrics article { background: linear-gradient(145deg,#292330,#1c1d25); border-color: #56485f; border-radius: 18px; }
+.analytics-metrics span,.analytics-note { color: var(--muted); }
+.analytics-metrics strong { color: var(--lime); }
+.analytics-metrics article:nth-child(3n+2) strong { color: var(--violet); }
+.analytics-metrics article:nth-child(3n) strong { color: var(--aqua); }
+.analytics-chart { background: var(--card); border-color: #56485f; border-radius: 18px; }
+.analytics-chart p { color: var(--muted); }
+.analytics-bars span { background: linear-gradient(0deg,#8c6cc4,#ccb2ff); border-radius: 5px 5px 0 0; }
+.analytics-bars small { color: var(--muted); }
+.analytics-table table { background: var(--card); color: #e4ddeb; }
+.analytics-table th,.analytics-table td { border-color: #4b4054; }
+.analytics-table thead { background: #302639; }
+.welcome-splash { background: radial-gradient(circle at 50% 32%,#4d326c,#171421 60%,#101116); }
+.welcome-mark { background: var(--lime); color: #253118; border-radius: 20px; }
+.welcome-splash p { color: #d2c6e2; }
+.welcome-splash strong,.welcome-loader span { color: var(--lime); }
+.welcome-loader span { background: var(--lime); }
+.daily-screen-border { display: none; }
+@media(max-width:600px),(max-height:500px) and (pointer:coarse) {
+  .modal { border-radius: 20px 20px 0 0; border-bottom: 0; }
+  .profile-sheet { border-radius: 20px 20px 0 0; }
+  .bottom-nav { border-radius: 18px 18px 0 0; border-bottom: 0; }
+  .property .price { font-size: 26px; }
+  .property-body { padding: 18px; }
+  .rental-modes button { border-radius: 16px; font-size: clamp(16px,4.5vw,20px); }
+}
+@media(max-width:700px) { .chat-app { border-radius: 0; } }
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior: auto!important; animation-duration: .01ms!important; transition-duration: .01ms!important; }
+}
