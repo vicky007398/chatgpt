@@ -35,6 +35,27 @@ let browser;
    await ctx.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[user],secret)),domain:new URL(url).hostname,path:'/'}]);
    return ctx;
   }
+  // Simulate only Google's successful handoff; exercise the real completion page
+  // and installed-app session refresh without using real Google credentials.
+  const loginContext=await browser.newContext({viewport:{width:390,height:844}});
+  await loginContext.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
+  await loginContext.route('**/auth/google?popup=1',async route=>{
+   await loginContext.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[buyer],secret)),domain:new URL(url).hostname,path:'/'}]);
+   await route.fulfill({status:302,headers:{location:url+'/auth/complete'},body:''});
+  });
+  const appWindow=await loginContext.newPage();
+  await appWindow.goto(url);
+  await appWindow.getByRole('button',{name:'Profile',exact:true}).first().click();
+  const popupPromise=appWindow.waitForEvent('popup');
+  await appWindow.getByRole('link',{name:'Continue with Google'}).click();
+  const authWindow=await popupPromise;
+  if(!authWindow.isClosed())await authWindow.waitForEvent('close');
+  await appWindow.getByRole('link',{name:'Continue with Google'}).waitFor({state:'hidden'});
+  await appWindow.getByRole('button',{name:'Profile',exact:true}).first().click();
+  await appWindow.getByRole('heading',{name:'Sample renter',exact:true}).waitFor();
+  assert.equal(appWindow.url(),url+'/','OAuth leaves the installed app on its original page');
+  await loginContext.close();
+  console.log('Google return simulation passed: completion closes popup and app restores signed-in session.');
   const seller=await context(owner),renter=await context(buyer);
   const page=await seller.newPage(),recipient=await renter.newPage();
   await page.goto(url);await page.getByRole('button',{name:'Chats',exact:true}).click();

@@ -27,6 +27,20 @@ test('account deletion protects other users and removes linked records; blocking
         cookies[user]='connect.sid='+encodeURIComponent('s:'+signature.sign(sid,secret));
       }
     }
+    const anonymousCompletion=await fetch(url+'/auth/complete',{redirect:'manual'});
+    assert.equal(anonymousCompletion.status,302);
+    assert.equal(anonymousCompletion.headers.get('location'),'/');
+    const completion=await fetch(url+'/auth/complete',{headers:{Cookie:cookies[owner]}});
+    assert.equal(completion.status,200);
+    assert.equal(completion.headers.get('cache-control'),'no-store');
+    assert.match(await completion.text(),/auth-return.js/);
+    const start=await fetch(url+'/auth/google?popup=1',{redirect:'manual'});
+    assert.equal(start.status,302);
+    const oauthLocation=new URL(start.headers.get('location'));
+    assert.equal(oauthLocation.hostname,'accounts.google.com');
+    assert.ok(oauthLocation.searchParams.get('state'));
+    const invalidCallback=await fetch(url+'/auth/google/callback?code=fake&state=wrong');
+    assert.equal(invalidCallback.status,400,'popup mode must not bypass OAuth state validation');
     for(const [id,user] of [[listing,owner],[second,owner],[kept,other]]){
       await db.query('INSERT INTO listings(id,owner,data,status) VALUES($1,$2,$3,$4)',[id,user,{title:'Deletion fixture',name:'Test owner',purpose:'rent',type:'House',village:'Kosamba',phone:'9876543210'},'approved']);
     }
