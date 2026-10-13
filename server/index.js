@@ -113,6 +113,13 @@ registerBilling(app,{pool,auth,admin,asyncRoute});
 registerLegal(app);
 app.use('/api',(req,res)=>res.status(404).json({error:'Endpoint not found'}));
 app.get('/favicon.ico',(req,res)=>res.redirect(302,'/icons/icon-192.png?v=kosrent-1'));
+const releaseDownloads=new Set(['kosrent-1.0.1.aab','kosrent-play-store-1.0.1.zip','SHA256SUMS.txt']);
+app.get('/downloads/:file',(req,res)=>{
+  if(!releaseDownloads.has(req.params.file))return res.sendStatus(404);
+  const type=req.params.file.endsWith('.aab')?'application/octet-stream':req.params.file.endsWith('.zip')?'application/zip':'text/plain; charset=utf-8';
+  res.download(path.resolve('dist/downloads',req.params.file),req.params.file,{headers:{'Content-Type':type}},err=>{if(err&&!res.headersSent)res.sendStatus(err.status||500);});
+});
+app.use('/downloads',(req,res)=>res.sendStatus(404));
 app.use(express.static(path.resolve('dist')));
 app.get('/{*path}',(req,res)=>res.sendFile(path.resolve('dist/index.html')));
 app.use((err,req,res,next)=>{console.error(err.code||err.name);res.status(err instanceof multer.MulterError?400:400).json({error:err instanceof multer.MulterError?'Upload limit exceeded':err.message.includes('Invalid')||err.message.includes('Enter')||err.message.includes('Select')||err.message.includes('photo')||err.message.includes('Price')||err.message.includes('Contact')||err.message.includes('Google Maps')?err.message:'Request failed. Please try again.'})});

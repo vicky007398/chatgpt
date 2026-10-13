@@ -19,6 +19,8 @@ The owner reports that developer-account setup is complete, and that **KosRent h
 
 The candidate is a free Kosamba rental app with Google sign-in, owner listings/photos, saved homes, private messaging, report/block tools, account deletion and an admin-only usage dashboard. It does not collect rent, deposits or listing fees. Do not enable manual UPI fees as part of the first Play release.
 
+Download the signed [Play upload bundle](https://kosrent.vedtechnologies.co.in/downloads/kosrent-1.0.1.aab) or the [complete release pack](https://kosrent.vedtechnologies.co.in/downloads/kosrent-play-store-1.0.1.zip) directly in your browser. [SHA-256 checksums](https://kosrent.vedtechnologies.co.in/downloads/SHA256SUMS.txt) identify these public files. Private signing keys and passwords are not included.
+
 ## Final steps in the existing Console
 
 1. **Create KosRent in Play Console.** Click Create app; enter KosRent, choose English, App and Free, and accept the applicable declarations truthfully. Choose House & Home and initial distribution in India in the relevant setup fields. Paste the prepared listing/contact/policy entries and upload the actual candidate graphics/screenshots.

@@ -1,0 +1,2 @@
+a78bae9d8ebc6dbf3a621b1da0f585f4ed0697ca4f244abc2c5caec9854b5a79  kosrent-1.0.1.aab
+c0071d564f73ccbbc8299cfd9d93211e7143d162b58cac4e1d8647fe4b1bf8c3  kosrent-play-store-1.0.1.zip
