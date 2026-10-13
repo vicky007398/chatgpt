@@ -51,6 +51,14 @@ test('installed-app OAuth tolerates a separate browser cookie jar while binding 
     assert.deepEqual(await (await fetch(base+'/me',{headers:{Cookie:signedCookie}})).json(),{user:id});
     assert.equal((await post('/api/auth/finish',cookie,attempt)).status,410,'claim consumed once');
     assert.equal((await fetch(base+'/callback?state=wrong&code=fake')).status,400);
+    const sharedStart=await post('/api/auth/start');const shared=await sharedStart.json();states.push(shared.state);
+    const sharedCookie=sharedStart.headers.get('set-cookie').split(';')[0];
+    const sharedCallback=await fetch(base+'/callback?'+new URLSearchParams({state:shared.state,code:shared.state}),{headers:{Cookie:sharedCookie}});
+    assert.equal((await sharedCallback.json()).success,true);
+    const restoredCookie=sharedCallback.headers.get('set-cookie').split(';')[0];
+    assert.notEqual(restoredCookie,sharedCookie);
+    assert.deepEqual(await (await fetch(base+'/me',{headers:{Cookie:restoredCookie}})).json(),{user:id},'shared Chrome session is signed in before the return window closes');
+    assert.equal((await db.query('SELECT state FROM app_login_attempts WHERE state=$1',[shared.state])).rowCount,0);
     const cancelledStart=await post('/api/auth/start');const cancelled=await cancelledStart.json();states.push(cancelled.state);
     const cancelledCookie=cancelledStart.headers.get('set-cookie').split(';')[0];
     assert.deepEqual(await (await fetch(base+'/callback?'+new URLSearchParams({state:cancelled.state,error:'access_denied'}))).json(),{success:false});

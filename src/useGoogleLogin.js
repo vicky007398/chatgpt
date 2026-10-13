@@ -20,19 +20,22 @@ export default function useGoogleLogin(refreshSession,api,onError) {
       busy=true;
       const attempt=pending.current;
       try {
+        // The callback may have already signed in the shared Chrome session.
+        if(await handlers.current.refreshSession()){if(alive&&pending.current===attempt)clear();return;}
         const result=await handlers.current.api('/auth/finish',{method:'POST',body:JSON.stringify(attempt)});
         if(!result.pending&&alive&&pending.current===attempt){clear();await handlers.current.refreshSession();}
-      } catch(e){if(alive&&pending.current===attempt){clear();handlers.current.onError(e);}} finally {busy=false;}
+      } catch(e){if(alive&&pending.current===attempt){let signedIn=false;try {signedIn=await handlers.current.refreshSession();} catch {}clear();if(!signedIn)handlers.current.onError(e);}} finally {busy=false;}
     };
     const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('kosrent-sign-in'):null;
     if(channel)channel.onmessage=e=>{accept(e.data);check();};
     const storage=e=>{if(e.key==='kosrent-sign-in'){try {accept(JSON.parse(e.newValue));} catch {}check();}};
+    const restore=()=>{if(pending.current)check();else if(!document.hidden)handlers.current.refreshSession().catch(()=>{});};
     window.addEventListener('storage',storage);
-    window.addEventListener('focus',check);
-    document.addEventListener('visibilitychange',check);
+    window.addEventListener('focus',restore);
+    document.addEventListener('visibilitychange',restore);
     const timer=setInterval(check,2000);
     check();
-    return()=>{alive=false;clearInterval(timer);channel?.close();window.removeEventListener('storage',storage);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',check);};
+    return()=>{alive=false;clearInterval(timer);channel?.close();window.removeEventListener('storage',storage);window.removeEventListener('focus',restore);document.removeEventListener('visibilitychange',restore);};
   },[]);
   return async event=>{
     if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;

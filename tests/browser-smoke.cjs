@@ -11,6 +11,7 @@ assert.ok(url&&secret&&process.env.TEST_DATABASE_URL,'Set isolated TEST_* variab
 const db=new pg.Pool({connectionString:process.env.TEST_DATABASE_URL});
 const owner=randomUUID(),buyer=randomUUID(),admin=randomUUID(),listing=randomUUID(),conversation=randomUUID();
 let browser;
+const loginAttempts=[];
 (async()=>{
  try {
   // Initialise the session table through the real application's login route.
@@ -41,6 +42,7 @@ let browser;
   await loginContext.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
   await loginContext.route('https://accounts.google.com/**',async route=>{
    const state=new URL(route.request().url()).searchParams.get('state');
+   loginAttempts.push(state);
    await route.fulfill({status:200,contentType:'text/html',body:`<!doctype html><script>location.replace(${JSON.stringify(url+'/auth/google/callback?state='+state+'&code=fixture')})</script>`});
   });
   await loginContext.route('**/auth/google/callback?**',async route=>{
@@ -63,6 +65,27 @@ let browser;
   assert.equal(appWindow.url(),url+'/','OAuth leaves the installed app on its original page');
   await loginContext.close();
   console.log('Google return simulation passed: completion closes popup and app restores signed-in session.');
+  // Reproduce Android losing the browser storage event after shared-cookie login.
+  const sharedContext=await browser.newContext({viewport:{width:390,height:844}});
+  await sharedContext.addInitScript(()=>sessionStorage.setItem('kosrent-welcome-shown','1'));
+  await sharedContext.route('https://accounts.google.com/**',async route=>{
+   loginAttempts.push(new URL(route.request().url()).searchParams.get('state'));
+   await sharedContext.addCookies([{name:'connect.sid',value:encodeURIComponent('s:'+signature.sign(sessionIds[buyer],secret)),domain:new URL(url).hostname,path:'/'}]);
+   await route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><script>window.close()</script>'});
+  });
+  const sharedApp=await sharedContext.newPage();
+  await sharedApp.goto(url);
+  await sharedApp.getByRole('button',{name:'Profile',exact:true}).first().click();
+  const sharedPopupPromise=sharedApp.waitForEvent('popup');
+  await sharedApp.getByRole('link',{name:'Continue with Google'}).click();
+  const sharedPopup=await sharedPopupPromise;
+  if(!sharedPopup.isClosed())await sharedPopup.waitForEvent('close');
+  await sharedApp.getByRole('link',{name:'Continue with Google'}).waitFor({state:'hidden'});
+  await sharedApp.getByRole('button',{name:'Profile',exact:true}).first().click();
+  await sharedApp.getByRole('heading',{name:'Sample renter',exact:true}).waitFor();
+  assert.equal(await sharedApp.evaluate(()=>localStorage.getItem('kosrent-sign-in')),null,'session restores without a browser receipt or storage event');
+  await sharedContext.close();
+  console.log('Shared Chrome session return passed without storage notifications.');
   const seller=await context(owner),renter=await context(buyer);
   const page=await seller.newPage(),recipient=await renter.newPage();
   await page.goto(url);
@@ -122,6 +145,7 @@ let browser;
   assert.match(await page.getByRole('link',{name:'Continue with Google, then return to this page'}).getAttribute('href'),/returnTo=delete-account/);
   console.log('Browser smoke passed: private mobile admin analytics, block/unblock/report, participant composer protection, Profile deletion, permanent deletion and signed-out state.');
  } finally {
+  await db.query('DELETE FROM app_login_attempts WHERE state=ANY($1::text[])',[loginAttempts]);
   if(browser)await browser.close();
   await db.query('DELETE FROM reports WHERE listing=$1 OR conversation=$2',[listing,conversation]);
   await db.query('DELETE FROM conversation_reads WHERE conversation=$1',[conversation]);

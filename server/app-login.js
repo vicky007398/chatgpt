@@ -62,6 +62,17 @@ export async function registerAppLogin(app,{pool,oauth,asyncRoute,returnPage,adm
       if(p.email_verified!==true||p.nonce!==attempt.nonce||typeof p.sub!=='string'||typeof p.email!=='string')throw Error('Invalid verified Google identity');
       const receipt=token();
       await pool.query("UPDATE app_login_attempts SET status='complete',profile=$2,verifier='',nonce='',receipt_hash=$3 WHERE state=$1",[attempt.state,{sub:p.sub,email:p.email,name:p.name||p.email},hash(receipt)]);
+      // Chrome's installed app and Custom Tab normally share their cookie jar.
+      // Complete that session here rather than depending on background storage
+      // events arriving before Android closes the Google window.
+      if(req.sessionID===attempt.session_id){
+        await pool.query('INSERT INTO users(id,email,name) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET email=$2,name=$3',[p.sub,p.email,p.name||p.email]);
+        await regenerate(req);
+        req.session.user=p.sub;
+        req.session.admin=adminEmails().has(p.email.toLowerCase());
+        await save(req);
+        await pool.query('DELETE FROM app_login_attempts WHERE state=$1',[attempt.state]);
+      }
       returnPage(res,true,{state:attempt.state,receipt});
     } catch {
       await pool.query("UPDATE app_login_attempts SET status='failed',verifier='',nonce='' WHERE state=$1",[attempt.state]);
