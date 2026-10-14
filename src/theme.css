@@ -130,6 +130,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .listing-form textarea { border-radius: 12px; }
 .listing-form .checkbox input { padding: 0; width: 18px; height: 18px; flex-shrink: 0; }
 .policy-links { color: var(--aqua); }
+.legal-language-note { flex-basis:100%;color:var(--muted);font-size:11px; }
 .profile-avatar { background: #d2d2d2; color: #3e3e3e; border-radius: 18px; }
 .profile-actions button,.profile-actions a {
   background: #dadada; border-color: #ababab; border-radius: 12px; color: #131313;
@@ -137,6 +138,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .profile-actions svg { color: var(--violet); }
 .profile-actions a[href="/delete-account"] { color: #333333; }
 .profile-actions a[href="/delete-account"] svg { color: #4b4b4b; }
+.language-picker { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0;padding:12px 14px;border:1px solid #dedede;border-radius:12px;font-size:14px;font-weight:600; }
+.language-picker select { width:min(55%,220px);min-height:44px;padding:8px 10px;background:#fff;border:1px solid #bdbdbd;border-radius:9px; }
 .setup-note,.demo-note,.map-reference,.share-options,.billing-panel,.payment-row {
   background: #dadada; border-color: #ababab; color: #323232; border-radius: 14px;
 }

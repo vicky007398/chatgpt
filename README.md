@@ -1,6 +1,6 @@
 # KosRent — Railway deployment
 
-React + Node.js + PostgreSQL property marketplace for Gujarat. Google accounts, shared listings, owner edits, administrator review, private in-app messaging, photo uploads, saved favourites, and English-only interface. No payments, commissions, WhatsApp integration, or SMS OTP.
+React + Node.js + PostgreSQL property marketplace for Gujarat. Google accounts, shared listings, owner edits, administrator review, private in-app messaging, photo uploads, saved favourites, and an English/Hindi/Gujarati interface. No payments, commissions, WhatsApp integration, or SMS OTP.
 
 ## Deploy from GitHub to Railway
 
@@ -53,7 +53,7 @@ Buyers and sellers can report listings and conversations, and block conversation
 
 ## Known remaining launch work
 
-- The release currently serves Kosamba only and uses English. Other-city selection and translated user content are not implemented.
+- The release currently serves Kosamba only. User-written listing and chat content is not translated automatically.
 - Privacy/terms, account deletion and report/block tools are implemented. The operator still needs to monitor reports and support, and establish production backup/log retention.
 - Test the signed Android release on real devices and through its Play test track, including Google sign-in and return to the app. Local synthetic-session tests do not establish that device behaviour.
 
@@ -64,7 +64,7 @@ Buyers and sellers can report listings and conversations, and block conversation
 ## Rental-only update
 KosRent accepts house rentals only, with 1/2/3 BHK, exact address, monthly rent and a non-negative deposit. Area is in sq ft. Approved rentals appear on Home; marking a home rented hides it from new searches. Legacy sale listings are retained but excluded from rental screens. Two entry points support finding a home or listing one for rent. No paid plans or payments are enabled.
 
-KosRent interface language is English only. Language switching is disabled; user-entered listing content is preserved as entered.
+The Profile sheet lets users choose English, Hindi or Gujarati. The choice is saved on the device and applies to the main app, chat, account deletion and offline screen. User-entered listing and chat content stays as written. Legal documents and Google-hosted sign-in screens remain in their original language; Play Store listing translations are managed separately in Play Console.
 
 ## Kosamba-only PWA
 

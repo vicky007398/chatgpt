@@ -2,15 +2,17 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import Live from './Live.jsx';
 import AppUpdate from './AppUpdate.jsx';
+import {I18nProvider,useI18n} from './i18n.jsx';
 import './style.css';
 import './theme.css';
 function WelcomeSplash(){
+ const {t}=useI18n();
  const [show,setShow]=React.useState(()=>!sessionStorage.getItem('kosrent-welcome-shown'));
  React.useEffect(()=>{if(!show)return;const timer=setTimeout(()=>{sessionStorage.setItem('kosrent-welcome-shown','1');setShow(false)},5000);return()=>clearTimeout(timer)},[show]);
  if(!show)return null;
- return <section className="welcome-splash" aria-label="Welcome to Kosamba">
+ return <section className="welcome-splash" aria-label={t('Welcome to Kosamba')}>
   <div className="welcome-mark"><span>K</span></div>
-  <p>Welcome to</p>
+  <p>{t('Welcome to')}</p>
   <h1>Kosamba</h1>
   <strong>KosRent</strong>
   <div className="welcome-loader" aria-hidden="true"><span/></div>
@@ -22,4 +24,4 @@ function DailyScreenBorder(){
  const color=colors[day%colors.length];
  return <div className="daily-screen-border" style={{'--daily-border':color}} aria-hidden="true"/>;
 }
-createRoot(document.getElementById('root')).render(<><Live/><AppUpdate/><WelcomeSplash/><DailyScreenBorder/></>);
+createRoot(document.getElementById('root')).render(<I18nProvider><Live/><AppUpdate/><WelcomeSplash/><DailyScreenBorder/></I18nProvider>);

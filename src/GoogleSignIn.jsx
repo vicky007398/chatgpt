@@ -1,4 +1,5 @@
 import React,{useEffect,useRef,useState} from 'react';
+import {useI18n} from './i18n.jsx';
 
 let sdk;
 function loadGoogle(){
@@ -16,6 +17,7 @@ function loadGoogle(){
 }
 
 export default function GoogleSignIn({api,onSignedIn,browserSignIn}){
+  const {t}=useI18n();
   const container=useRef(null),handlers=useRef({api,onSignedIn});
   handlers.current={api,onSignedIn};
   const [error,E]=useState(''),[busy,B]=useState(false),[loading,L]=useState(true),[retry,R]=useState(0);
@@ -47,10 +49,10 @@ export default function GoogleSignIn({api,onSignedIn,browserSignIn}){
     return()=>{alive=false;};
   },[retry]);
   return <div className="google-sign-in">
-    <div ref={container} aria-label="Google sign-in" inert={busy?true:undefined}/>
-    {loading&&<p role="status">Loading Google sign-in…</p>}
-    {busy&&<p role="status">Finishing sign-in…</p>}
-    {error&&<><p className="error" role="alert">{error}</p><button type="button" onClick={()=>R(v=>v+1)}>Try again</button></>}
-    {!loading&&<a className="browser-sign-in" href="/auth/google" onClick={browserSignIn}>Use browser sign-in</a>}
+    <div ref={container} aria-label={t('Google sign-in')} inert={busy?true:undefined}/>
+    {loading&&<p role="status">{t('Loading Google sign-in…')}</p>}
+    {busy&&<p role="status">{t('Finishing sign-in…')}</p>}
+    {error&&<><p className="error" role="alert">{t(error)}</p><button type="button" onClick={()=>R(v=>v+1)}>{t('Try again')}</button></>}
+    {!loading&&<a className="browser-sign-in" href="/auth/google" onClick={browserSignIn}>{t('Use browser sign-in')}</a>}
   </div>;
 }
