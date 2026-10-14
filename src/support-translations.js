@@ -70,10 +70,7 @@ export const SUPPORT_TRANSLATIONS={
   'Sign-in failed. Please try again.':'साइन-इन नहीं हो सका। कृपया फिर कोशिश करें।',
   'Welcome to Kosamba':'कोसांबा में आपका स्वागत है',
   'Welcome to':'स्वागत है',
-  'No brokerage.':'कोई ब्रोकरेज नहीं।',
-  'Just your next home in Kosamba.':'बस कोसांबा में आपका अगला घर।',
-  'Find a rental and connect directly with the owner.':'किराये का घर खोजें और सीधे मालिक से बात करें।',
-  'Skip intro':'परिचय छोड़ें',
+  'No brokerage in Kosamba.':'कोसांबा में कोई ब्रोकरेज नहीं।',
  },
  gu:{
   'Terms':'નિયમો અને શરતો',
@@ -145,9 +142,6 @@ export const SUPPORT_TRANSLATIONS={
   'Sign-in failed. Please try again.':'સાઇન-ઇન થઈ શક્યું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.',
   'Welcome to Kosamba':'કોસંબામાં આપનું સ્વાગત છે',
   'Welcome to':'સ્વાગત છે',
-  'No brokerage.':'કોઈ બ્રોકરેજ નહીં.',
-  'Just your next home in Kosamba.':'બસ કોસંબામાં તમારું નવું ઘર.',
-  'Find a rental and connect directly with the owner.':'ભાડાનું ઘર શોધો અને સીધા માલિક સાથે વાત કરો.',
-  'Skip intro':'પરિચય છોડો',
+  'No brokerage in Kosamba.':'કોસંબામાં કોઈ બ્રોકરેજ નહીં.',
  },
 };

@@ -238,6 +238,7 @@ body { background:var(--surface); }
 .text-search input,.chat-search input { background:transparent; }
 .welcome-splash { background:#ffffff; }
 .welcome-mark { color:#ffffff; }
+.welcome-splash .welcome-tagline { max-width:85vw;color:#555;font-size:13px;font-weight:500;line-height:1.4;animation:welcome-rise .85s .6s both; }
 
 .developer-contact { flex-basis:100%;overflow-wrap:anywhere; }
 .no-property-photo,.photo-slider { background:#f2f2f2;color:#606060; }
