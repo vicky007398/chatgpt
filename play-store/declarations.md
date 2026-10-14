@@ -35,7 +35,7 @@ The app provides acceptance of Terms/Privacy before posting, published conduct r
 
 ## Testing and production access
 
-The owner reports that setup of the **personal** Play developer account is complete. No account-setup confirmation is needed again. **The owner confirmed that the KosRent app has not yet been created in Play Console.** Play App Signing, upload, test-track results and production publication still follow app creation.
+The owner reports that setup of the **personal** Play developer account is complete. No account-setup confirmation is needed again. Owner screenshots show KosRent created with version **1.0.1** available to internal and closed testers. The closed test's required opt-in period, production-access application and production publication remain outstanding.
 
 For personal accounts subject to Google's newer production-access requirement, the standard closed-test requirement is at least **12 opted-in testers continuously for 14 days**, followed by a production-access application. Follow the exact requirement and eligibility shown in this account's Console; an internal test does not substitute for a required closed test. Real testers must use the app and the operator must answer the production-access questions truthfully. Do not fabricate tester participation or test results.
 

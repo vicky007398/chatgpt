@@ -26,10 +26,10 @@ export KOSRENT_UPLOAD_KEY_ALIAS=kosrent-upload
 
 ## Website verification after Play enrollment
 
-Google Play App Signing normally uses a different certificate from the local upload key. Copy **App signing key certificate → SHA-256 certificate fingerprint** from the app's App integrity page in Play Console. Set `ANDROID_SHA256_FINGERPRINTS` in the website's hosting environment and redeploy. Multiple fingerprints, including a direct-test APK certificate, can be comma-separated.
+Google Play App Signing uses a different certificate from the local upload key. The public Play app-signing SHA-256 supplied from Play Console is included in the website's Digital Asset Links response. `ANDROID_SHA256_FINGERPRINTS` can still add future signing certificates in the hosting environment; separate multiple fingerprints with commas.
 
-The server publishes `/.well-known/assetlinks.json` with the verified certificate for the directly distributed APK. It merges additional real Play app-signing fingerprints configured in `ANDROID_SHA256_FINGERPRINTS`; it does not substitute the upload certificate for Play App Signing. Verify the deployed URL returns HTTP 200 JSON with the **Play app signing certificate**, without authentication or redirects. Until verification succeeds, the app may show a browser toolbar.
+The server publishes `/.well-known/assetlinks.json` with the certificates for both the directly distributed APK and the Play-signed app. It merges any additional fingerprints configured in `ANDROID_SHA256_FINGERPRINTS`. Verify the deployed URL returns HTTP 200 JSON with the **Play app signing certificate**, without authentication or redirects. Until verification succeeds, the app may show a browser toolbar.
 
-The owner reports Play developer-account setup is complete, but KosRent has not yet been created inside Console. App creation, the final Play signing certificate, test-track upload, real-device Google login/testing and Play review still require the owner's accounts and device. An Android build does not complete those steps or guarantee store acceptance. See `../play-store/README.md`.
+KosRent has an active closed-testing release in Play Console. Real-device Google login/testing, browser-toolbar verification and Play review still require the owner's testers and devices. An Android build does not complete those steps or guarantee store acceptance. See `../play-store/README.md`.
 
 The local signed bundle and APK are saved outside the checkout in `/workspace/releases/`. Upload signing material is stored privately in `/workspace/release-private/`; keep the keystore and its password backed up securely, separately from public source code. These local paths are not GitHub files.

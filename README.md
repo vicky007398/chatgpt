@@ -72,7 +72,7 @@ KosRent now serves rentals in Kosamba, Surat only. The home screen has two large
 
 PWA files are in `public/manifest.webmanifest`, `public/sw.js`, `public/offline.html`, and `public/icons/`. Deploy over HTTPS. On Android Chrome, use the download icon when an installation prompt is available, or the browser's Install app / Add to Home screen menu. On iPhone, use Safari → Share → Add to Home Screen. Installation UI depends on browser/device support. Test on real devices after Railway deployment. The offline screen is available, but current listings, accounts and messages require a connection. The worker does not cache API or OAuth traffic.
 
-The Android Trusted Web Activity project and signed version 1.0.1/code 2 release are prepared. The owner reports Play developer-account setup is complete, but KosRent has not been created inside Console. App creation, signed AAB upload, Play certificate association and the account's testing/review requirements remain external steps; see [play-store/README.md](play-store/README.md).
+The Android Trusted Web Activity project and signed version 1.0.1/code 2 release are prepared. Owner screenshots show KosRent created with version 1.0.1 active in Play's internal and closed-testing tracks. The public Play app-signing fingerprint is included in Digital Asset Links, but deployed association and the toolbar-free Play-installed view still need verification. The account's closed-test and production-review requirements remain external steps; see [play-store/README.md](play-store/README.md).
 
 ## Rental form fields
 
@@ -116,7 +116,7 @@ An Android Trusted Web Activity project is in `android/`, with store listing and
 
 The operator defaults to the owner-supplied **Ved Technologies**, and the public developer contact is `rathodar110@gmail.com`, shown in Profile, listing forms, legal pages and account deletion. Legal pages and `/api/billing/config` use this email for support when `SUPPORT_EMAIL` is unset; an explicit support email still takes precedence. The business address is omitted from public pages and configuration, as requested. Administrator access and free operation remain controlled separately.
 
-The server serves `/.well-known/assetlinks.json` for `in.co.vedtechnologies.kosrent` with the verified certificate signing the directly distributed APK. Its public certificate is [android/upload-certificate.pem](android/upload-certificate.pem). After Play App Signing enrollment, add the actual **Play app-signing certificate** to `ANDROID_SHA256_FINGERPRINTS` (comma-separated if several are needed) and redeploy. The direct APK/upload certificate does not establish association for a build signed by Google Play. Building the Android package does not publish it or verify live OAuth/device behaviour.
+The server serves `/.well-known/assetlinks.json` for `in.co.vedtechnologies.kosrent` with both the verified direct-APK certificate and the public **Play app-signing SHA-256** supplied from Play Console. The direct APK's public certificate is [android/upload-certificate.pem](android/upload-certificate.pem). Additional certificates can be added with `ANDROID_SHA256_FINGERPRINTS`. Verify the deployed response and a Play-installed build on a real device before claiming toolbar-free behaviour. Building the Android package does not publish it or verify live OAuth/device behaviour.
 
 Run the isolated API tests with `node --test tests/integration.test.js tests/accounts.test.js` and their documented `TEST_*` variables; run `node --test tests/android.test.js` for certificate validation.
 
